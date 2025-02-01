@@ -16,127 +16,114 @@ pub struct SPIRVBindingOffsets {
 #[derive(Debug, Clone, Copy)]
 pub enum Denoiser {
     /*
-    IMPORTANT: IN_MV, IN_NORMAL_ROUGHNESS, IN_VIEWZ are used by any denoiser
-    These denoisers DON'T use:
-        REFERENCE - IN_MV, IN_NORMAL_ROUGHNESS, IN_VIEWZ
-        SPECULAR_DELTA_MV - IN_NORMAL_ROUGHNESS, IN_VIEWZ
+    IMPORTANT:
+      - InMv, InNormalRoughness, InViewz are used by any denoiser, but these
+    denoisers DON'T use:
+          - SigmaShadow & SigmaShadowTranslucency - InMv, if
+    "stabilizationStrength = 0"
+          - Reference - InMv, InNormalRoughness, InViewz
+      - Optional inputs are in ()
     */
-    // =============================================================================================================================
+    //=============================================================================================================================
     // REBLUR
-    // =============================================================================================================================
+    //=============================================================================================================================
 
-    // INPUTS - IN_DIFF_RADIANCE_HITDIST,
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_RADIANCE_HITDIST
+    // INPUTS - InDiffRadianceHitdist (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffRadianceHitdist
     ReblurDiffuse,
 
-    // INPUTS - IN_DIFF_HITDIST,
-    // OUTPUTS - OUT_DIFF_HITDIST
+    // INPUTS - InDiffHitdist (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffHitdist
     ReblurDiffuseOcclusion,
 
-    // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1
+    // INPUTS - InDiffSh0, InDiffSh1 (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffSh0, OutDiffSh1
     ReblurDiffuseSh,
 
-    // INPUTS - IN_SPEC_RADIANCE_HITDIST,
-    // OPTIONAL INPUTS - IN_SPEC_DIRECTION_PDF, IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_SPEC_RADIANCE_HITDIST
+    // INPUTS - InSpecRadianceHitdist (InSpecConfidence,
+    // InDisocclusionThresholdMix, InBasecolorMetalness) OUTPUTS -
+    // OutSpecRadianceHitdist
     ReblurSpecular,
 
-    // INPUTS - IN_SPEC_HITDIST,
-    // OUTPUTS - OUT_SPEC_HITDIST
+    // INPUTS - InSpecHitdist (InSpecConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutSpecHitdist
     ReblurSpecularOcclusion,
 
-    // INPUTS - IN_SPEC_SH0, IN_SPEC_SH1
-    // OPTIONAL INPUTS - IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_SPEC_SH0, OUT_SPEC_SH1
+    // INPUTS - InSpecSh0, InSpecSh1 (InSpecConfidence,
+    // InDisocclusionThresholdMix, InBasecolorMetalness) OUTPUTS -
+    // OutSpecSh0, OutSpecSh1
     ReblurSpecularSh,
 
-    // INPUTS - IN_DIFF_RADIANCE_HITDIST, IN_SPEC_RADIANCE_HITDIST,
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE,  IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_RADIANCE_HITDIST, OUT_SPEC_RADIANCE_HITDIST
+    // INPUTS - InDiffRadianceHitdist, InSpecRadianceHitdist
+    // (InDiffConfidence, InSpecConfidence, InDisocclusionThresholdMix,
+    // InBasecolorMetalness) OUTPUTS - OutDiffRadianceHitdist,
+    // OutSpecRadianceHitdist
     ReblurDiffuseSpecular,
 
-    // INPUTS - IN_DIFF_HITDIST, IN_SPEC_HITDIST,
-    // OUTPUTS - OUT_DIFF_HITDIST, OUT_SPEC_HITDIST
+    // INPUTS - InDiffHitdist, InSpecHitdist (InDiffConfidence,
+    // InSpecConfidence, InDisocclusionThresholdMix) OUTPUTS -
+    // OutDiffHitdist, OutSpecHitdist
     ReblurDiffuseSpecularOcclusion,
 
-    // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1, IN_SPEC_SH0, IN_SPEC_SH1
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE,  IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1, OUT_SPEC_SH0, OUT_SPEC_SH1
+    // INPUTS - InDiffSh0, InDiffSh1, InSpecSh0, InSpecSh1
+    // (InDiffConfidence, InSpecConfidence, InDisocclusionThresholdMix,
+    // InBasecolorMetalness) OUTPUTS - OutDiffSh0, OutDiffSh1, OutSpecSh0,
+    // OutSpecSh1
     ReblurDiffuseSpecularSh,
 
-    // INPUTS - IN_DIFF_DIRECTION_HITDIST,
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_DIRECTION_HITDIST
+    // INPUTS - InDiffDirectionHitdist (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffDirectionHitdist
     ReblurDiffuseDirectionalOcclusion,
 
-    // =============================================================================================================================
-    // SIGMA
-    // =============================================================================================================================
-
-    // INPUTS - IN_SHADOWDATA, OUT_SHADOW_TRANSLUCENCY (used as history)
-    // OUTPUTS - OUT_SHADOW_TRANSLUCENCY
-    SigmaShadow,
-
-    // INPUTS - IN_SHADOWDATA, IN_SHADOW_TRANSLUCENCY, OUT_SHADOW_TRANSLUCENCY (used as history)
-    // OUTPUTS - OUT_SHADOW_TRANSLUCENCY
-    SigmaShadowTranslucency,
-
-    // =============================================================================================================================
+    //=============================================================================================================================
     // RELAX
-    // =============================================================================================================================
+    //=============================================================================================================================
 
-    // INPUTS - IN_DIFF_RADIANCE_HITDIST
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_RADIANCE_HITDIST
+    // INPUTS - InDiffRadianceHitdist (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffRadianceHitdist
     RelaxDiffuse,
 
-    // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1
+    // INPUTS - InDiffSh0, InDiffSh1 (InDiffConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutDiffSh0, OutDiffSh1
     RelaxDiffuseSh,
 
-    // INPUTS - IN_SPEC_RADIANCE_HITDIST
-    // OPTIONAL INPUTS - IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_SPEC_RADIANCE_HITDIST
+    // INPUTS - InSpecRadianceHitdist (InSpecConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutSpecRadianceHitdist
     RelaxSpecular,
 
-    // INPUTS - IN_SPEC_SH0, IN_SPEC_SH1
-    // OPTIONAL INPUTS - IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_SPEC_SH0, OUT_SPEC_SH1
+    // INPUTS - InSpecSh0, InSpecSh1 (InSpecConfidence,
+    // InDisocclusionThresholdMix) OUTPUTS - OutSpecSh0, OutSpecSh1
     RelaxSpecularSh,
 
-    // INPUTS - IN_DIFF_RADIANCE_HITDIST, IN_SPEC_RADIANCE_HITDIST
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE,  IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_RADIANCE_HITDIST, OUT_SPEC_RADIANCE_HITDIST
+    // INPUTS - InDiffRadianceHitdist, InSpecRadianceHitdist
+    // (InDiffConfidence, InSpecConfidence, InDisocclusionThresholdMix)
+    // OUTPUTS - OutDiffRadianceHitdist, OutSpecRadianceHitdist
     RelaxDiffuseSpecular,
 
-    // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1, IN_SPEC_SH0, IN_SPEC_SH1
-    // OPTIONAL INPUTS - IN_DIFF_CONFIDENCE,  IN_SPEC_CONFIDENCE
-    // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1, OUT_SPEC_SH0, OUT_SPEC_SH1
+    // INPUTS - InDiffSh0, InDiffSh1, InSpecSh0, InSpecSh1
+    // (InDiffConfidence, InSpecConfidence, InDisocclusionThresholdMix)
+    // OUTPUTS - OutDiffSh0, OutDiffSh1, OutSpecSh0, OutSpecSh1
     RelaxDiffuseSpecularSh,
 
-    // =============================================================================================================================
+    //=============================================================================================================================
+    // SIGMA
+    //=============================================================================================================================
+
+    // INPUTS - InPenumbra, OutShadowTranslucency
+    // OUTPUTS - OutShadowTranslucency
+    SigmaShadow,
+
+    // INPUTS - InPenumbra, InTranslucency, OutShadowTranslucency
+    // OUTPUTS - OutShadowTranslucency
+    SigmaShadowTranslucency,
+
+    //=============================================================================================================================
     // REFERENCE
-    // =============================================================================================================================
+    //=============================================================================================================================
 
-    // INPUTS - IN_RADIANCE
-    // OUTPUTS - OUT_RADIANCE
+    // INPUTS - InSignal
+    // OUTPUTS - OutSignal
     Reference,
-
-    // =============================================================================================================================
-    // MOTION VECTORS
-    // =============================================================================================================================
-
-    // INPUTS - IN_SPEC_HITDIST
-    // OUTPUTS - OUT_REFLECTION_MV
-    SpecularReflectionMv,
-
-    // INPUTS - IN_DELTA_PRIMARY_POS, IN_DELTA_SECONDARY_POS
-    // OUTPUT - OUT_DELTA_MV
-    SpecularDeltaMv,
 }
 
 #[repr(u8)]
@@ -232,12 +219,10 @@ pub struct Identifier(pub u32);
 pub struct DenoiserDesc {
     pub identifier: Identifier,
     pub denoiser: Denoiser,
-    pub render_width: u16,
-    pub render_height: u16,
 }
 
 #[repr(C)]
-pub(crate) struct MemoryAllocatorInterface {
+pub(crate) struct AllocationCallbacks {
     pub(crate) allocate:
         extern "C" fn(user_arg: *const c_void, size: usize, alignment: usize) -> *mut c_void,
     pub(crate) reallocate: extern "C" fn(
@@ -255,7 +240,7 @@ pub(crate) struct MemoryAllocatorInterface {
 
 #[repr(C)]
 pub(crate) struct InstanceCreationDesc {
-    pub memory_allocator_interface: MemoryAllocatorInterface,
+    pub allocation_allbacks: AllocationCallbacks,
     pub denoisers: *const DenoiserDesc,
     pub denoisers_num: u32,
 }
@@ -406,9 +391,7 @@ impl Debug for PipelineDesc {
 #[derive(Debug, Clone)]
 pub struct TextureDesc {
     pub format: Format,
-    pub width: u16,
-    pub height: u16,
-    pub mip_num: u16,
+    pub downsample_factor: u16,
 }
 
 #[repr(C)]
@@ -543,30 +526,53 @@ pub struct CommonSettings {
     pub camera_jitter: [f32; 2],
     pub camera_jitter_prev: [f32; 2],
 
-    // (0; 1] - dynamic resolution scaling
-    pub resolution_scale: [f32; 2],
-    pub resolution_scale_prev: [f32; 2],
+    // Flexible dynamic resolution scaling support
+    pub resource_size: [u16; 2],
+    pub resource_size_prev: [u16; 2],
+    pub rect_size: [u16; 2],
+    pub rect_size_prev: [u16; 2],
 
-    // (ms) - user provided if > 0, otherwise - tracked internally
+    // (>0) - viewZ = IN_VIEWZ * viewZScale (mostly for FP16 viewZ)
+    pub view_z_scale: f32,
+
+    // (Optional) (ms) - user provided if > 0, otherwise - tracked internally
     pub time_delta_between_frames: f32,
 
-    // (units) > 0 - use TLAS or tracing range (max value = NRD_FP16_MAX / NRD_FP16_VIEWZ_SCALE - 1 = 524031)
+    // (units > 0) - use TLAS or tracing range
+    // It's highly recommended to use "viewZ > denoisingRange" for INF (sky) pixels
     pub denoising_range: f32,
 
-    // (normalized %) - if relative distance difference is greater than threshold, history gets reset (0.5-2.5% works well)
+    // [0.01; 0.02] - two samples considered occluded if relative distance difference is greater than this slope-scaled threshold
     pub disocclusion_threshold: f32,
 
-    // (normalized %) - alternative disocclusion threshold, which is mixed to based on IN_DISOCCLUSION_THRESHOLD_MIX
+    // (Optional) [0.02; 0.2] - an alternative disocclusion threshold, which is mixed to based on:
+    // - "strandThickness", if there is "strandMaterialID" match
+    // - IN_DISOCCLUSION_THRESHOLD_MIX texture, if "isDisocclusionThresholdMixAvailable = true" (has higher priority and ignores "strandMaterialID")    pub disocclusion_threshold_alternate: f32,
     pub disocclusion_threshold_alternate: f32,
+
+    // (Optional) (>=0) - marks reflections of camera attached objects (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+    // This material ID marks reflections of objects attached to the camera, not objects themselves. Unfortunately, this is only an improvement
+    // for critical cases, but not a generic solution. A generic solution requires reflection MVs, which NRD currently doesn't ask for
+    pub camera_attached_reflection_material_id: f32,
+
+    // (Optional) (>=0) - marks hair (grass) geometry to enable "under-the-hood" tweaks (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+    pub strand_material_id: f32,
+
+    // (units > 0) - defines how "disocclusionThreshold" blends into "disocclusionThresholdAlternate" = pixelSize / (pixelSize + strandThickness)
+    pub strand_thickness: f32,
 
     // [0; 1] - enables "noisy input / denoised output" comparison
     pub split_screen: f32,
 
     // For internal needs
+    pub printf_at: [u16; 2],
+    // For internal needs
     pub debug: f32,
 
-    // (pixels) - data rectangle origin in ALL input textures
-    pub input_subrect_origin: [u32; 2],
+    // (Optional) (pixels) - viewport origin
+    // IMPORTANT: gets applied only to non-noisy guides (aka g-buffer), including IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE,
+    // IN_DISOCCLUSION_THRESHOLD_MIX and IN_BASECOLOR_METALNESS. Must be manually enabled via NRD_USE_VIEWPORT_OFFSET macro switch
+    pub rect_origin: [u32; 2],
 
     // A consecutive number
     pub frame_index: u32,
@@ -604,15 +610,22 @@ impl Default for CommonSettings {
             motion_vector_scale: [1.0, 1.0, 0.0],
             camera_jitter: [0.0; 2],
             camera_jitter_prev: [0.0; 2],
-            resolution_scale: [1.0, 1.0],
-            resolution_scale_prev: [1.0, 1.0],
+            resource_size: [0, 0],
+            resource_size_prev: [0, 0],
+            rect_size: [0, 0],
+            rect_size_prev: [0, 0],
+            view_z_scale: 1.0,
             time_delta_between_frames: 0.0,
             denoising_range: 500000.0,
             disocclusion_threshold: 0.01,
             disocclusion_threshold_alternate: 0.05,
+            camera_attached_reflection_material_id: 999.0,
+            strand_material_id: 999.0,
+            strand_thickness: 80e-6,
             split_screen: 0.0,
+            printf_at: [9999, 9999],
             debug: 0.0,
-            input_subrect_origin: [0, 0],
+            rect_origin: [0, 0],
             frame_index: 0,
             accumulation_mode: AccumulationMode::Continue,
             is_motion_vector_in_world_space: false,
@@ -626,41 +639,65 @@ impl Default for CommonSettings {
 
 #[repr(u32)]
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ResourceType {
     //=============================================================================================================================
-    // COMMON INPUTS
+    // NON-NOISY INPUTS
     //=============================================================================================================================
 
-    // 3D world-space motion (RGBA16f+) or 2D screen-space motion (RG16f+), MVs must be non-jittered, MV = previous - current
+    // 3D world-space motion (RGBA16f+) or 2D screen-space motion (RG16f+), MVs
+    // must be non-jittered, MV = previous - current
     IN_MV,
 
-    // Data must match encoding in "NRD_FrontEnd_PackNormalAndRoughness" and "NRD_FrontEnd_UnpackNormalAndRoughness" (RGBA8+)
+    // Data must match encoding in "NRD_FrontEnd_PackNormalAndRoughness" and
+    // "NRD_FrontEnd_UnpackNormalAndRoughness" (RGBA8+)
     IN_NORMAL_ROUGHNESS,
 
     // Linear view depth for primary rays (R16f+)
     IN_VIEWZ,
 
+    // (Optional) User-provided history confidence in range 0-1, i.e. antilag
+    // (R8+) Used only if "CommonSettings::isHistoryConfidenceAvailable = true"
+    // and "NRD_USE_HISTORY_CONFIDENCE = 1"
+    IN_DIFF_CONFIDENCE,
+    IN_SPEC_CONFIDENCE,
+
+    // (Optional) User-provided disocclusion threshold selector in range 0-1 (R8+)
+    // Disocclusion threshold is mixed between "disocclusionThreshold" and
+    // "disocclusionThresholdAlternate" Used only if
+    // "CommonSettings::isDisocclusionThresholdMixAvailable = true" and
+    // "NRD_USE_DISOCCLUSION_THRESHOLD_MIX = 1"
+    IN_DISOCCLUSION_THRESHOLD_MIX,
+
+    // (Optional) Base color (can be decoupled to diffuse and specular albedo
+    // based on metalness) and metalness (RGBA8+) Used only if
+    // "CommonSettings::isBaseColorMetalnessAvailable = true" and
+    // "NRD_USE_BASECOLOR_METALNESS = 1". Currently used only by REBLUR (if
+    // Temporal Stabilization pass is available and "stabilizationStrength != 0")
+    // to patch MV if specular (virtual) motion prevails on diffuse (surface)
+    // motion
+    IN_BASECOLOR_METALNESS,
+
     //=============================================================================================================================
-    // INPUTS
+    // NOISY INPUTS
     //=============================================================================================================================
 
-    // Noisy radiance and hit distance (RGBA16f+)
+    // Radiance and hit distance (RGBA16f+)
     //      REBLUR: use "REBLUR_FrontEnd_PackRadianceAndNormHitDist" for encoding
     //      RELAX: use "RELAX_FrontEnd_PackRadianceAndHitDist" for encoding
     IN_DIFF_RADIANCE_HITDIST,
     IN_SPEC_RADIANCE_HITDIST,
 
-    // Noisy hit distance (R8+)
+    // Hit distance (R8+)
     //      REBLUR: use "REBLUR_FrontEnd_GetNormHitDist" for encoding
     IN_DIFF_HITDIST,
     IN_SPEC_HITDIST,
 
-    // Noisy bent normal and normalized hit distance (RGBA8+)
+    // Sampling direction and normalized hit distance (RGBA8+)
     //      REBLUR: use "REBLUR_FrontEnd_PackDirectionalOcclusion" for encoding
     IN_DIFF_DIRECTION_HITDIST,
 
-    // Noisy SH data (2x RGBA16f+)
+    // SH data (2x RGBA16f+)
     //      REBLUR: use "REBLUR_FrontEnd_PackSh" for encoding
     //      RELAX: use "RELAX_FrontEnd_PackSh" for encoding
     IN_DIFF_SH0,
@@ -668,27 +705,15 @@ pub enum ResourceType {
     IN_SPEC_SH0,
     IN_SPEC_SH1,
 
-    // (Optional) User-provided history confidence in range 0-1, i.e. antilag (R8+)
-    // Used only if "CommonSettings::isHistoryConfidenceAvailable = true"
-    IN_DIFF_CONFIDENCE,
-    IN_SPEC_CONFIDENCE,
+    // Penumbra and optional translucency (R16f+ and RGBA8+ for translucency)
+    //      SIGMA: use "SIGMA_FrontEnd_PackPenumbra" for penumbra properties
+    //      encoding SIGMA: use "SIGMA_FrontEnd_PackTranslucency" for translucency
+    //      encoding
+    IN_PENUMBRA,
+    IN_TRANSLUCENCY,
 
-    // (Optional) User-provided disocclusion threshold selector in range 0-1 (R8+)
-    // Disocclusion threshold is mixed between "disocclusionThreshold" and "disocclusionThresholdAlternate"
-    // Used only if "CommonSettings::isDisocclusionThresholdMixAvailable = true"
-    IN_DISOCCLUSION_THRESHOLD_MIX,
-
-    // (Optional) Base color (can be decoupled to diffuse and specular albedo based on metalness) and metalness (RGBA8+)
-    // Used only if "CommonSettings::isBaseColorMetalnessAvailable = true"
-    IN_BASECOLOR_METALNESS,
-
-    // Noisy shadow data and optional translucency (RG16f+ and RGBA8+ for optional translucency)
-    //      SIGMA: use "SIGMA_FrontEnd_PackShadow" for encoding
-    IN_SHADOWDATA,
-    IN_SHADOW_TRANSLUCENCY,
-
-    // Noisy signal (R8+)
-    IN_RADIANCE,
+    // Some signal (R8+)
+    IN_SIGNAL,
 
     // Primary and secondary world-space positions (RGBA16f+)
     IN_DELTA_PRIMARY_POS,
@@ -698,43 +723,42 @@ pub enum ResourceType {
     // OUTPUTS
     //=============================================================================================================================
 
-    // IMPORTANT: These textures can be potentially used as history buffers!
-    // IMPORTANT: Most of denoisers do not write into output pixels outside of "CommonSettings::denoisingRange"!
+    // IMPORTANT: Most of denoisers do not write into output pixels outside of
+    // "CommonSettings::denoisingRange"!
 
-    // Denoised radiance and hit distance
-    //      REBLUR: use "REBLUR_BackEnd_UnpackRadianceAndNormHitDist" for decoding (RGBA16f+)
-    //      RELAX: use "RELAX_BackEnd_UnpackRadiance" for decoding (R11G11B10f+)
-    OUT_DIFF_RADIANCE_HITDIST,
-    OUT_SPEC_RADIANCE_HITDIST,
+    // Radiance and hit distance
+    //      REBLUR: use "REBLUR_BackEnd_UnpackRadianceAndNormHitDist" for decoding
+    //      (RGBA16f+) RELAX: use "RELAX_BackEnd_UnpackRadiance" for decoding
+    //      (R11G11B10f+)
+    OUT_DIFF_RADIANCE_HITDIST, // IMPORTANT: used as history if
+    // "stabilizationStrength != 0"
+    OUT_SPEC_RADIANCE_HITDIST, // IMPORTANT: used as history if
+    // "stabilizationStrength != 0"
 
-    // Denoised SH data
+    // SH data
     //      REBLUR: use "REBLUR_BackEnd_UnpackSh" for decoding (2x RGBA16f+)
     //      RELAX: use "RELAX_BackEnd_UnpackSh" for decoding (2x RGBA16f+)
-    OUT_DIFF_SH0,
-    OUT_DIFF_SH1,
-    OUT_SPEC_SH0,
-    OUT_SPEC_SH1,
+    OUT_DIFF_SH0, // IMPORTANT: used as history if "stabilizationStrength != 0"
+    OUT_DIFF_SH1, // IMPORTANT: used as history if "stabilizationStrength != 0"
+    OUT_SPEC_SH0, // IMPORTANT: used as history if "stabilizationStrength != 0"
+    OUT_SPEC_SH1, // IMPORTANT: used as history if "stabilizationStrength != 0"
 
-    // Denoised normalized hit distance (R8+)
+    // Normalized hit distance (R8+)
     OUT_DIFF_HITDIST,
     OUT_SPEC_HITDIST,
 
-    // Denoised bent normal and normalized hit distance (RGBA8+)
+    // Bent normal and normalized hit distance (RGBA8+)
     //      REBLUR: use "REBLUR_BackEnd_UnpackDirectionalOcclusion" for decoding
-    OUT_DIFF_DIRECTION_HITDIST,
+    OUT_DIFF_DIRECTION_HITDIST, // IMPORTANT: used as history if
+    // "stabilizationStrength != 0"
 
-    // Denoised shadow and optional transcluceny (R8+ or RGBA8+)
+    // Shadow and optional transcluceny (R8+ or RGBA8+)
     //      SIGMA: use "SIGMA_BackEnd_UnpackShadow" for decoding
-    OUT_SHADOW_TRANSLUCENCY,
+    OUT_SHADOW_TRANSLUCENCY, // IMPORTANT: used as history if
+    // "stabilizationStrength != 0"
 
-    // Denoised signal
-    OUT_RADIANCE,
-
-    // 2D screen-space specular motion (RG16f+), MV = previous - current
-    OUT_REFLECTION_MV,
-
-    // 2D screen-space refraction motion (RG16f+), MV = previous - current
-    OUT_DELTA_MV,
+    // Denoised signal (R8+)
+    OUT_SIGNAL,
 
     // (Optional) Debug output (RGBA8+), .w = transparency
     // Used if "CommonSettings::enableValidation = true"
@@ -752,28 +776,32 @@ pub enum ResourceType {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ResourceDesc {
-    pub state_needed: DescriptorType,
+    pub descriptor_type: DescriptorType,
     pub ty: ResourceType,
     pub index_in_pool: u16,
-    pub mip_offset: u16,
-    pub mip_num: u16,
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct DispatchDesc {
     name: *const c_char,
+    identifier: Identifier,
     resources: *const ResourceDesc,
     resources_num: u32,
     constant_buffer_data: *const u8,
     constant_buffer_data_size: u32,
+    constant_buffer_data_matches_previous_dispatch: bool,
     pub pipeline_index: u16,
     pub grid_width: u16,
     pub grid_height: u16,
 }
 impl DispatchDesc {
     pub fn constant_buffer(&self) -> &[u8] {
+        if self.constant_buffer_data.is_null() {
+            return &[];
+        }
         unsafe {
             std::slice::from_raw_parts(
                 self.constant_buffer_data,
@@ -841,22 +869,26 @@ impl Default for HitDistanceParameters {
 #[repr(C)]
 #[derive(Clone)]
 pub struct ReblurAntilagSettings {
-    // [1; 3] - delta is reduced by local variance multiplied by this value
+    /// [1; 5] - delta is reduced by local variance multiplied by this value
+    ///
+    /// can be 3.0 or even less if signal is good
     pub luminance_sigma_scale: f32,
     pub hit_distance_sigma_scale: f32,
 
-    // (0; 1] - antilag = pow( antilag, power )
-    pub luminance_antilag_power: f32,
-    pub hit_distance_antilag_power: f32,
+    /// [1; 5] - antilag sensitivity (smaller values increase sensitivity)
+    ///
+    /// can be 2.0 or even less if signal is good
+    pub luminance_sensitivity: f32,
+    pub hit_distance_sensitivity: f32,
 }
 
 impl Default for ReblurAntilagSettings {
     fn default() -> Self {
         Self {
-            luminance_sigma_scale: 2.0,
-            hit_distance_sigma_scale: 2.0,
-            luminance_antilag_power: 0.5,
-            hit_distance_antilag_power: 1.0,
+            luminance_sigma_scale: 4.0,
+            hit_distance_sigma_scale: 3.0,
+            luminance_sensitivity: 3.0,
+            hit_distance_sensitivity: 2.0,
         }
     }
 }
@@ -895,6 +927,15 @@ pub struct ReblurSettings {
     // [0; REBLUR_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames in fast history (less than "maxAccumulatedFrameNum")
     pub max_fast_accumulated_frame_num: u32,
 
+    // [0; maxAccumulatedFrameNum] - maximum number of linearly accumulated frames for stabilized radiance
+    // "0" disables the stabilization pass
+    // Values ">= maxAccumulatedFrameNum"  get clamped to "maxAccumulatedFrameNum"
+    pub max_stabilized_frame_num: u32,
+
+    // [0; maxAccumulatedFrameNum] - maximum number of linearly accumulated frames for stabilized hit distance
+    // 0 - allows to reach parity with "REBLUR_OCCLUSION"
+    pub max_stabilized_frame_num_for_hit_distance: u32,
+
     // [0; REBLUR_MAX_HISTORY_FRAME_NUM] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
     pub history_fix_frame_num: u32,
 
@@ -902,11 +943,11 @@ pub struct ReblurSettings {
     pub diffuse_prepass_blur_radius: f32,
     pub specular_prepass_blur_radius: f32,
 
-    // (pixels) - base denoising radius (30 is a baseline for 1440p)
-    pub blur_radius: f32,
+    // (pixels) - min denoising radius (for converged state)
+    pub min_blur_radius: f32,
 
-    // (pixels) - base stride between samples in history reconstruction pass
-    pub history_fix_stride_between_samples: f32,
+    // (pixels) - base (max) denoising radius (gets reduced over time)
+    pub max_blur_radius: f32,
 
     // (normalized %) - base fraction of diffuse or specular lobe angle used to drive normal based rejection
     pub lobe_angle_fraction: f32,
@@ -917,31 +958,26 @@ pub struct ReblurSettings {
     // [0; 1] - if roughness < this, temporal accumulation becomes responsive and driven by roughness (useful for animated water)
     pub responsive_accumulation_roughness_threshold: f32,
 
-    // (normalized %) - stabilizes output, more stabilization improves antilag (clean signals can use lower values)
-    pub stabilization_strength: f32,
-
-    // (normalized %) - represents maximum allowed deviation from local tangent plane
+    // (normalized %) - represents maximum allowed deviation from the local tangent plane
     pub plane_distance_sensitivity: f32,
-
     // IN_MV = lerp(IN_MV, specularMotion, smoothstep(this[0], this[1], specularProbability))
     pub specular_probability_thresholds_for_mv_modification: [f32; 2],
+
+    // [1; 3] - undesired sporadic outliers suppression to keep output stable (smaller values maximize suppression in exchange of bias)
+    pub firefly_suppressor_min_relative_scale: f32,
 
     // If not OFF and used for DIFFUSE_SPECULAR, defines diffuse orientation, specular orientation is the opposite
     pub checkerboard_mode: CheckerboardMode,
 
-    // Must be used only in case of probabilistic sampling (not checkerboarding), when a pixel can be skipped and have "0" (invalid) hit distance
     pub hit_distance_reconstruction_mode: HitDistanceReconstructionMode,
 
     // Adds bias in case of badly defined signals, but tries to fight with fireflies
     pub enable_anti_firefly: bool,
 
-    // Turns off spatial filtering and virtual motion based specular tracking
-    pub enable_reference_accumulation: bool,
-
     // Boosts performance by sacrificing IQ
     pub enable_performance_mode: bool,
 
-    // Spatial passes do optional material index comparison as: ( materialEnabled ? material[ center ] == material[ sample ] : 1 )
+    // (Optional) material ID comparison: enableMaterialTest ? materialID[x] == materialID[y] : 1 (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
     pub enable_material_test_for_diffuse: bool,
     pub enable_material_test_for_specular: bool,
 
@@ -950,7 +986,7 @@ pub struct ReblurSettings {
     // worsening the situation. Despite that it's a problem of sampling, the denoiser needs to
     // handle it somehow on its side too. Diffuse pre-pass can be just disabled, but for specular
     // it's still needed to find optimal hit distance for tracking. This boolean allow to use
-    // specular pre-pass for tracking purposes only
+    // specular pre-pass for tracking purposes only (use with care)
     pub use_prepass_only_for_specular_motion_estimation: bool,
 }
 
@@ -961,21 +997,22 @@ impl Default for ReblurSettings {
             antilag_settings: Default::default(),
             max_accumulated_frame_num: 30,
             max_fast_accumulated_frame_num: 6,
+            max_stabilized_frame_num: 63,
+            max_stabilized_frame_num_for_hit_distance: 63,
             history_fix_frame_num: 3,
             diffuse_prepass_blur_radius: 30.0,
             specular_prepass_blur_radius: 50.0,
-            blur_radius: 15.0,
-            history_fix_stride_between_samples: 14.0,
+            min_blur_radius: 1.0,
+            max_blur_radius: 30.0,
             lobe_angle_fraction: 0.15,
             roughness_fraction: 0.15,
             responsive_accumulation_roughness_threshold: 0.0,
-            stabilization_strength: 1.0,
-            plane_distance_sensitivity: 0.005,
+            plane_distance_sensitivity: 0.02,
             specular_probability_thresholds_for_mv_modification: [0.5, 0.9],
+            firefly_suppressor_min_relative_scale: 2.0,
             checkerboard_mode: CheckerboardMode::Off,
             hit_distance_reconstruction_mode: HitDistanceReconstructionMode::Off,
             enable_anti_firefly: false,
-            enable_reference_accumulation: false,
             enable_performance_mode: false,
             enable_material_test_for_diffuse: false,
             enable_material_test_for_specular: false,
@@ -986,17 +1023,23 @@ impl Default for ReblurSettings {
 
 #[repr(C)]
 pub struct SigmaSettings {
-    // (normalized %) - represents maximum allowed deviation from local tangent plane
+    // Direction to the light source
+    // IMPORTANT: it is needed only for directional light sources (sun)
+    pub light_direction: [f32; 3],
+
+    // (normalized %) - represents maximum allowed deviation from the local tangent plane
     pub plane_distance_sensitivity: f32,
 
-    // [1; 3] - adds bias and stability if > 1
-    pub blur_radius_scale: f32,
+    // [0; SIGMA_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames
+    // 0 - disables the stabilization pass
+    pub max_stabilized_frame_num: u32,
 }
 impl Default for SigmaSettings {
     fn default() -> Self {
         Self {
-            plane_distance_sensitivity: 0.005,
-            blur_radius_scale: 2.0,
+            light_direction: [0.0, 0.0, 0.0],
+            plane_distance_sensitivity: 0.02,
+            max_stabilized_frame_num: 5,
         }
     }
 }
@@ -1033,30 +1076,37 @@ impl Default for RelaxAntilagSettings {
 // RELAX_DIFFUSE_SPECULAR
 #[repr(C)]
 
-pub struct RelaxDiffuseSpecularSettings {
+pub struct RelaxSettings {
     pub antilag_settings: RelaxAntilagSettings,
-    // (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, must be used in case of probabilistic sampling)
-    pub diffuse_prepass_blur_radius: f32,
-    pub specular_prepass_blur_radius: f32,
-
     // [0; RELAX_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames ( = FPS * "time of accumulation")
     pub diffuse_max_accumulated_frame_num: u32,
     pub specular_max_accumulated_frame_num: u32,
 
-    // [0; RELAX_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames in fast history (less than "maxAccumulatedFrameNum")
+    // [0; diffuseMaxAccumulatedFrameNum) - maximum number of linearly accumulated frames for diffuse fast history
+    // Values ">= diffuseMaxAccumulatedFrameNum" disable diffuse fast history
+    // Usually 5x times shorter than the main history
     pub diffuse_max_fast_accumulated_frame_num: u32,
+    // [0; specularMaxAccumulatedFrameNum) - maximum number of linearly accumulated frames for specular fast history
+    // Values ">= specularMaxAccumulatedFrameNum" disable specular fast history
+    // Usually 5x times shorter than the main history
     pub specular_max_fast_accumulated_frame_num: u32,
 
-    // [0; RELAX_MAX_HISTORY_FRAME_NUM] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
+    // [0; 3] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
     pub history_fix_frame_num: u32,
+
+    // (>= 0) - history length threshold below which spatial variance estimation will be executed
+    pub spatial_variance_estimation_history_threshold: u32,
+
+    // (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, must be used in case of probabilistic sampling)
+    pub diffuse_prepass_blur_radius: f32,
+    pub specular_prepass_blur_radius: f32,
 
     // A-trous edge stopping Luminance sensitivity
     pub diffuse_phi_luminance: f32,
     pub specular_phi_luminance: f32,
 
     // (normalized %) - base fraction of diffuse or specular lobe angle used to drive normal based rejection
-    pub diffuse_lobe_angle_fraction: f32,
-    pub specular_lobe_angle_fraction: f32,
+    pub lobe_angle_fraction: f32,
 
     // (normalized %) - base fraction of center roughness used to drive roughness based rejection
     pub roughness_fraction: f32,
@@ -1067,17 +1117,11 @@ pub struct RelaxDiffuseSpecularSettings {
     // (degrees) - slack for the specular lobe angle used in normal based rejection of specular during A-Trous passes
     pub specular_lobe_angle_slack: f32,
 
-    // (pixels) - base stride between samples in history reconstruction pass
-    pub history_fix_stride_between_samples: f32,
-
     // (> 0) - normal edge stopper for history reconstruction pass
     pub history_fix_edge_stopping_normal_power: f32,
 
     // [1; 3] - standard deviation scale of color box for clamping main "slow" history to responsive "fast" history
     pub history_clamping_color_box_sigma_scale: f32,
-
-    // (>= 0) - history length threshold below which spatial variance estimation will be executed
-    pub spatial_variance_estimation_history_threshold: u32,
 
     // [2; 8] - number of iterations for A-Trous wavelet transform
     pub atrous_iteration_num: u32,
@@ -1110,9 +1154,6 @@ pub struct RelaxDiffuseSpecularSettings {
     // Firefly suppression
     pub enable_anti_firefly: bool,
 
-    // Skip reprojection test when there is no motion, might improve quality along the edges for static camera with a jitter
-    pub enable_reprojection_test_skipping_without_motion: bool,
-
     // Roughness based rejection
     pub enable_roughness_edge_stopping: bool,
 
@@ -1121,28 +1162,32 @@ pub struct RelaxDiffuseSpecularSettings {
     pub enable_material_test_for_specular: bool,
 }
 
-impl Default for RelaxDiffuseSpecularSettings {
+impl Default for RelaxSettings {
     fn default() -> Self {
         Self {
             antilag_settings: Default::default(),
-            diffuse_prepass_blur_radius: 50.0,
-            specular_prepass_blur_radius: 50.0,
             diffuse_max_accumulated_frame_num: 30,
             specular_max_accumulated_frame_num: 30,
+
             diffuse_max_fast_accumulated_frame_num: 6,
             specular_max_fast_accumulated_frame_num: 6,
+
             history_fix_frame_num: 3,
+            spatial_variance_estimation_history_threshold: 3,
+
+            diffuse_prepass_blur_radius: 30.0,
+            specular_prepass_blur_radius: 50.0,
+
             diffuse_phi_luminance: 2.0,
             specular_phi_luminance: 1.0,
-            diffuse_lobe_angle_fraction: 0.5,
-            specular_lobe_angle_fraction: 0.5,
+
+            lobe_angle_fraction: 0.5,
             roughness_fraction: 0.15,
+
             specular_variance_boost: 0.0,
             specular_lobe_angle_slack: 0.15,
-            history_fix_stride_between_samples: 14.0,
             history_fix_edge_stopping_normal_power: 8.0,
             history_clamping_color_box_sigma_scale: 2.0,
-            spatial_variance_estimation_history_threshold: 3,
             atrous_iteration_num: 5,
             diffuse_min_luminance_weight: 0.0,
             specular_min_luminance_weight: 0.0,
@@ -1156,158 +1201,9 @@ impl Default for RelaxDiffuseSpecularSettings {
             checkerboard_mode: CheckerboardMode::Off,
             hit_distance_reconstruction_mode: HitDistanceReconstructionMode::Off,
             enable_anti_firefly: false,
-            enable_reprojection_test_skipping_without_motion: false,
-            enable_roughness_edge_stopping: true,
+            enable_roughness_edge_stopping: false,
             enable_material_test_for_diffuse: false,
             enable_material_test_for_specular: false,
-        }
-    }
-}
-
-// RELAX_DIFFUSE
-
-#[repr(C)]
-pub struct RelaxDiffuseSettings {
-    pub antilag_settings: RelaxAntilagSettings,
-    pub prepass_blur_radius: f32,
-
-    pub diffuse_max_accumulated_frame_num: u32,
-    pub diffuse_max_fast_accumulated_frame_num: u32,
-    pub history_fix_frame_num: u32,
-
-    pub diffuse_phi_luminance: f32,
-    pub diffuse_lobe_angle_fraction: f32,
-
-    pub history_fix_edge_stopping_normal_power: f32,
-    pub history_fix_stride_between_samples: f32,
-
-    pub history_clamping_color_box_sigma_scale: f32,
-
-    pub spatial_variance_estimation_history_threshold: u32,
-    pub atrous_iteration_num: u32,
-    pub min_luminance_weight: f32,
-    pub depth_threshold: f32,
-
-    pub confidence_driven_relaxation_multiplier: f32,
-    pub confidence_driven_luminance_edge_stopping_relaxation: f32,
-    pub confidence_driven_normal_edge_stopping_relaxation: f32,
-
-    pub checkerboard_mode: CheckerboardMode,
-    pub hit_distance_reconstruction_mode: HitDistanceReconstructionMode,
-
-    pub enable_anti_firefly: bool,
-    pub enable_reprojection_test_skipping_without_motion: bool,
-    pub enable_material_test: bool,
-}
-
-impl Default for RelaxDiffuseSettings {
-    fn default() -> Self {
-        Self {
-            antilag_settings: Default::default(),
-            prepass_blur_radius: 30.0,
-            diffuse_max_accumulated_frame_num: 30,
-            diffuse_max_fast_accumulated_frame_num: 6,
-            history_fix_frame_num: 3,
-            diffuse_phi_luminance: 2.0,
-            diffuse_lobe_angle_fraction: 0.5,
-            history_fix_edge_stopping_normal_power: 8.0,
-            history_fix_stride_between_samples: 14.0,
-            history_clamping_color_box_sigma_scale: 2.0,
-            spatial_variance_estimation_history_threshold: 3,
-            atrous_iteration_num: 5,
-            min_luminance_weight: 0.0,
-            depth_threshold: 0.01,
-            confidence_driven_relaxation_multiplier: 0.0,
-            confidence_driven_luminance_edge_stopping_relaxation: 0.0,
-            confidence_driven_normal_edge_stopping_relaxation: 0.0,
-            checkerboard_mode: CheckerboardMode::Off,
-            hit_distance_reconstruction_mode: HitDistanceReconstructionMode::Off,
-            enable_anti_firefly: false,
-            enable_reprojection_test_skipping_without_motion: false,
-            enable_material_test: false,
-        }
-    }
-}
-
-// RELAX_SPECULAR
-
-#[repr(C)]
-pub struct RelaxSpecularSettings {
-    pub antilag_settings: RelaxAntilagSettings,
-    pub prepass_blur_radius: f32,
-
-    pub specular_max_accumulated_frame_num: u32,
-    pub specular_max_fast_accumulated_frame_num: u32,
-    pub history_fix_frame_num: u32,
-
-    pub specular_phi_luminance: f32,
-    pub diffuse_lobe_angle_fraction: f32,
-    pub specular_lobe_angle_fraction: f32,
-    pub roughness_fraction: f32,
-
-    pub specular_variance_boost: f32,
-    pub specular_lobe_angle_slack: f32,
-
-    pub history_fix_edge_stopping_normal_power: f32,
-    pub history_fix_stride_between_samples: f32,
-
-    pub history_clamping_color_box_sigma_scale: f32,
-
-    pub spatial_variance_estimation_history_threshold: u32,
-    pub atrous_iteration_num: u32,
-    pub min_luminance_weight: f32,
-    pub depth_threshold: f32,
-
-    pub confidence_driven_relaxation_multiplier: f32,
-    pub confidence_driven_luminance_edge_stopping_relaxation: f32,
-    pub confidence_driven_normal_edge_stopping_relaxation: f32,
-
-    pub luminance_edge_stopping_relaxation: f32,
-    pub normal_edge_stopping_relaxation: f32,
-    pub roughness_edge_stopping_relaxation: f32,
-
-    pub checkerboard_mode: CheckerboardMode,
-    pub hit_distance_reconstruction_mode: HitDistanceReconstructionMode,
-
-    pub enable_anti_firefly: bool,
-    pub enable_reprojection_test_skipping_without_motion: bool,
-    pub enable_roughness_edge_stopping: bool,
-    pub enable_material_test: bool,
-}
-
-impl Default for RelaxSpecularSettings {
-    fn default() -> Self {
-        Self {
-            antilag_settings: Default::default(),
-            prepass_blur_radius: 50.0,
-            specular_max_accumulated_frame_num: 30,
-            specular_max_fast_accumulated_frame_num: 6,
-            history_fix_frame_num: 3,
-            specular_phi_luminance: 1.0,
-            diffuse_lobe_angle_fraction: 0.5,
-            specular_lobe_angle_fraction: 0.5,
-            roughness_fraction: 0.15,
-            specular_variance_boost: 0.0,
-            specular_lobe_angle_slack: 0.15,
-            history_fix_edge_stopping_normal_power: 8.0,
-            history_fix_stride_between_samples: 14.0,
-            history_clamping_color_box_sigma_scale: 2.0,
-            spatial_variance_estimation_history_threshold: 3,
-            atrous_iteration_num: 5,
-            min_luminance_weight: 0.0,
-            depth_threshold: 0.01,
-            confidence_driven_relaxation_multiplier: 0.0,
-            confidence_driven_luminance_edge_stopping_relaxation: 0.0,
-            confidence_driven_normal_edge_stopping_relaxation: 0.0,
-            luminance_edge_stopping_relaxation: 0.5,
-            normal_edge_stopping_relaxation: 0.3,
-            roughness_edge_stopping_relaxation: 1.0,
-            checkerboard_mode: CheckerboardMode::Off,
-            hit_distance_reconstruction_mode: HitDistanceReconstructionMode::Off,
-            enable_anti_firefly: false,
-            enable_reprojection_test_skipping_without_motion: false,
-            enable_roughness_edge_stopping: true,
-            enable_material_test: false,
         }
     }
 }
@@ -1326,10 +1222,7 @@ impl Default for ReferenceSettings {
 
 #[cfg(any(
     target_env = "msvc",
-    all(
-        not(target_arch = "aarch64"),
-        not(target_arch = "x86_64"),
-    )
+    all(not(target_arch = "aarch64"), not(target_arch = "x86_64"),)
 ))]
 macro_rules! nrd_abi {
     ($($toks: tt)+) => {
@@ -1339,17 +1232,13 @@ macro_rules! nrd_abi {
 
 #[cfg(not(any(
     target_env = "msvc",
-    all(
-        not(target_arch = "aarch64"),
-        not(target_arch = "x86_64"),
-    )
+    all(not(target_arch = "aarch64"), not(target_arch = "x86_64"),)
 )))]
 macro_rules! nrd_abi {
     ($($toks: tt)+) => {
         extern "C" {$($toks)+}
     };
 }
-
 
 nrd_abi! {
     pub(crate) fn GetLibraryDesc() -> &'static LibraryDesc;

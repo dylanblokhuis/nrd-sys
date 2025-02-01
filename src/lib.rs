@@ -2,13 +2,12 @@
 
 use std::ffi::c_void;
 
-mod ffi;
+pub mod ffi;
 
 pub use ffi::{
     AccumulationMode, CheckerboardMode, CommonSettings, Denoiser, DenoiserDesc, DescriptorType,
     DispatchDesc, Format, HitDistanceParameters, HitDistanceReconstructionMode, Identifier,
-    ReblurAntilagSettings, ReblurSettings, ReferenceSettings, RelaxAntilagSettings,
-    RelaxDiffuseSettings, RelaxDiffuseSpecularSettings, RelaxSpecularSettings, ResourceDesc,
+    ReblurAntilagSettings, ReblurSettings, ReferenceSettings, RelaxAntilagSettings, ResourceDesc,
     ResourceType, SPIRVBindingOffsets, Sampler, SigmaSettings, TextureDesc,
 };
 
@@ -57,9 +56,7 @@ mod allocator {
 
 pub trait DenoiserSettings {}
 impl DenoiserSettings for ffi::ReblurSettings {}
-impl DenoiserSettings for ffi::RelaxDiffuseSettings {}
-impl DenoiserSettings for ffi::RelaxDiffuseSpecularSettings {}
-impl DenoiserSettings for ffi::RelaxSpecularSettings {}
+impl DenoiserSettings for ffi::RelaxSettings {}
 impl DenoiserSettings for ffi::ReferenceSettings {}
 impl DenoiserSettings for ffi::SigmaSettings {}
 
@@ -73,7 +70,7 @@ impl Instance {
     }
     pub fn new(denoisers: &[ffi::DenoiserDesc]) -> Result<Self, ffi::Result> {
         let desc = ffi::InstanceCreationDesc {
-            memory_allocator_interface: ffi::MemoryAllocatorInterface {
+            allocation_allbacks: ffi::AllocationCallbacks {
                 allocate: allocator::allocate,
                 reallocate: allocator::reallocate,
                 free: allocator::free,

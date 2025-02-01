@@ -1,0 +1,1041 @@
+LibraryDesc {
+    spirv_binding_offsets: SPIRVBindingOffsets {
+        sampler_offset: 100,
+        texture_offset: 200,
+        constant_buffer_offset: 300,
+        storage_texture_and_buffer_offset: 400,
+    },
+    supported_denoisers: [
+        ReblurDiffuse,
+        ReblurDiffuseOcclusion,
+        ReblurDiffuseSh,
+        ReblurSpecular,
+        ReblurSpecularOcclusion,
+        ReblurSpecularSh,
+        ReblurDiffuseSpecular,
+        ReblurDiffuseSpecularOcclusion,
+        ReblurDiffuseSpecularSh,
+        ReblurDiffuseDirectionalOcclusion,
+        RelaxDiffuse,
+        RelaxDiffuseSh,
+        RelaxSpecular,
+        RelaxSpecularSh,
+        RelaxDiffuseSpecular,
+        RelaxDiffuseSpecularSh,
+        SigmaShadow,
+        SigmaShadowTranslucency,
+        Reference,
+    ],
+    version_major: 4,
+    version_minor: 11,
+    version_build: 4,
+    normal_encoding: R10G10B10A2Unorm,
+    roughness_encoding: LINEAR,
+}
+InstanceDesc {
+    constant_buffer_max_data_size: 848,
+    constant_buffer_space_index: 0,
+    constant_buffer_register_index: 0,
+    samplers: [
+        NearestClamp,
+        NearestMirroredRepeat,
+    ],
+    samplers_space_index: 0,
+    samplers_base_register_index: 0,
+    pipelines: [
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(7652 bytes),
+            shader_file_name: "REBLUR_ClassifyTiles.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(14076 bytes),
+            shader_file_name: "REBLUR_Diffuse_HitDistReconstruction.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(13288 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_HitDistReconstruction.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(14096 bytes),
+            shader_file_name: "REBLUR_Diffuse_HitDistReconstruction_5x5.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(13308 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_HitDistReconstruction_5x5.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(37444 bytes),
+            shader_file_name: "REBLUR_Diffuse_PrePass.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(31688 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_PrePass.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(34040 bytes),
+            shader_file_name: "REBLUR_Diffuse_TemporalAccumulation.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 12,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(30984 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_TemporalAccumulation.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 12,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 4,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(20116 bytes),
+            shader_file_name: "REBLUR_Diffuse_HistoryFix.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 6,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(20096 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_HistoryFix.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 6,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(32148 bytes),
+            shader_file_name: "REBLUR_Diffuse_Blur.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(27196 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_Blur.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(33484 bytes),
+            shader_file_name: "REBLUR_Diffuse_PostBlur_NoTemporalStabilization.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 3,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(28532 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_PostBlur_NoTemporalStabilization.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 3,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(32532 bytes),
+            shader_file_name: "REBLUR_Diffuse_PostBlur.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(27580 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_PostBlur.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 5,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(5740 bytes),
+            shader_file_name: "REBLUR_Diffuse_Copy.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(18928 bytes),
+            shader_file_name: "REBLUR_Diffuse_TemporalStabilization.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 7,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 3,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(17240 bytes),
+            shader_file_name: "REBLUR_Perf_Diffuse_TemporalStabilization.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 7,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 3,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(6480 bytes),
+            shader_file_name: "REBLUR_Diffuse_SplitScreen.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 2,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(77008 bytes),
+            shader_file_name: "REBLUR_Validation.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: Texture,
+                    base_register_index: 0,
+                    descriptors_num: 7,
+                },
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: true,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(636 bytes),
+            shader_file_name: "Clear_Float.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: false,
+        },
+        PipelineDesc {
+            compute_shader_dxbc: ComputeShaderDesc(0 bytes),
+            compute_shader_dxil: ComputeShaderDesc(0 bytes),
+            compute_shader_spirv: ComputeShaderDesc(624 bytes),
+            shader_file_name: "Clear_Uint.cs",
+            shader_entry_point_name: "main",
+            resource_ranges: [
+                ResourceRangeDesc {
+                    descriptor_type: StorageTexture,
+                    base_register_index: 0,
+                    descriptors_num: 1,
+                },
+            ],
+            has_constant_data: false,
+        },
+    ],
+    resources_space_index: 0,
+    permanent_pool: [
+        TextureDesc {
+            format: R32_SFLOAT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R10_G10_B10_A2_UNORM,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R16_UINT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: RGBA16_SFLOAT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R16_SFLOAT,
+            downsample_factor: 1,
+        },
+    ],
+    transient_pool: [
+        TextureDesc {
+            format: R8_UNORM,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R8_UINT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: RGBA16_SFLOAT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: RGBA16_SFLOAT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R16_SFLOAT,
+            downsample_factor: 1,
+        },
+        TextureDesc {
+            format: R8_UNORM,
+            downsample_factor: 16,
+        },
+    ],
+    descriptor_pool_desc: DescriptorPoolDesc {
+        sets_max_num: 75,
+        constant_buffers_max_num: 60,
+        samplers_max_num: 150,
+        textures_max_num: 514,
+        storage_textures_max_num: 189,
+    },
+}
+[
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 8,
+        grid_height: 5,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 2,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 3,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 4,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 0,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (ui)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 1,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 23,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 4,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 0,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 1,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: OUT_DIFF_RADIANCE_HITDIST,
+                index_in_pool: 0,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (ui)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 2,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 23,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 3,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "Clear (f)",
+        resources: [
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: IN_MV,
+                index_in_pool: 0,
+            },
+        ],
+        constant_buffer: "0 bytes",
+        pipeline_index: 22,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - Classify tiles",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 0,
+        grid_width: 120,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - Pre-pass",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_NORMAL_ROUGHNESS,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_DIFF_RADIANCE_HITDIST,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 2,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 5,
+        grid_width: 240,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - Temporal accumulation",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_NORMAL_ROUGHNESS,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_MV,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 1,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 2,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 2,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: OUT_DIFF_RADIANCE_HITDIST,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 4,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 3,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 4,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 1,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 7,
+        grid_width: 240,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - History fix",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_NORMAL_ROUGHNESS,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 3,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 4,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 2,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 4,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 9,
+        grid_width: 240,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - Blur",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_NORMAL_ROUGHNESS,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 2,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_VIEWZ,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 3,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 0,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 11,
+        grid_width: 240,
+        grid_height: 68,
+    },
+    DispatchDesc {
+        name: "REBLUR_Diffuse - Post-blur",
+        resources: [
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 5,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: IN_NORMAL_ROUGHNESS,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: TRANSIENT_POOL,
+                index_in_pool: 3,
+            },
+            ResourceDesc {
+                descriptor_type: Texture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 1,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: OUT_DIFF_RADIANCE_HITDIST,
+                index_in_pool: 0,
+            },
+            ResourceDesc {
+                descriptor_type: StorageTexture,
+                ty: PERMANENT_POOL,
+                index_in_pool: 2,
+            },
+        ],
+        constant_buffer: "832 bytes",
+        pipeline_index: 13,
+        grid_width: 240,
+        grid_height: 68,
+    },
+]

@@ -5,15 +5,17 @@ fn main() {
     let mut instance = nrd_sys::Instance::new(&[nrd_sys::DenoiserDesc {
         identifier: id1,
         denoiser: nrd_sys::Denoiser::ReblurDiffuse,
-        render_width: 100,
-        render_height: 100,
     }])
     .unwrap();
     let desc = instance.desc();
     println!("{:#?}", desc);
 
     instance
-        .set_common_settings(&nrd_sys::CommonSettings::default())
+        .set_common_settings(&nrd_sys::CommonSettings {
+            resource_size: [1920, 1080],
+            rect_size: [1920, 1080],
+            ..Default::default()
+        })
         .unwrap();
     instance
         .set_denoiser_settings(id1, &nrd_sys::ReferenceSettings::default())
