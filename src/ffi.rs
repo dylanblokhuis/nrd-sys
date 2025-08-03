@@ -498,102 +498,141 @@ pub enum AccumulationMode {
 #[repr(C)]
 #[derive(Debug)]
 pub struct CommonSettings {
-    // Matrix requirements:
-    //     - usage - vector is a column
-    //     - layout - column-major
-    //     - non jittered!
-    // LH / RH projection matrix (INF far plane is supported) with non-swizzled rows, i.e. clip-space depth = z / w
+    ///
+    ///  Matrix requirements:
+    ///
+    ///      - usage - vector is a column
+    ///      - layout - column-major
+    ///      - non jittered!
+    ///
+    ///  LH / RH projection matrix (INF far plane is supported) with non-swizzled rows, i.e. clip-space depth = z / w
     pub view_to_clip_matrix: [f32; 16],
 
-    // Previous projection matrix
+    ///
+    ///  Previous projection matrix
     pub view_to_clip_matrix_prev: [f32; 16],
 
-    // World-space to camera-space matrix
+    ///
+    ///  World-space to camera-space matrix
     pub world_to_view_matrix: [f32; 16],
 
-    // If coordinate system moves with the camera, camera delta must be included to reflect camera motion
+    ///
+    ///  If coordinate system moves with the camera, camera delta must be included to reflect camera motion
     pub world_to_view_matrix_prev: [f32; 16],
 
-    // (Optional) Previous world-space to current world-space matrix. It is for virtual normals, where a coordinate
-    // system of the virtual space changes frame to frame, such as in a case of animated intermediary reflecting
-    // surfaces when primary surface replacement is used for them.
+    ///
+    ///  (Optional) Previous world-space to current world-space matrix. It is for virtual normals, where a coordinate
+    ///
+    ///  system of the virtual space changes frame to frame, such as in a case of animated intermediary reflecting
+    ///
+    ///  surfaces when primary surface replacement is used for them.
     pub world_prev_to_world_matrix: [f32; 16],
 
-    // used as "IN_MV * motionVectorScale" (use .z = 0 for 2D screen-space motion)
+    ///
+    ///  used as "IN_MV * motionVectorScale" (use .z = 0 for 2D screen-space motion)
     pub motion_vector_scale: [f32; 3],
 
-    // [-0.5; 0.5] - sampleUv = pixelUv + cameraJitter
+    ///
+    ///  [-0.5; 0.5] - sampleUv = pixelUv + cameraJitter
     pub camera_jitter: [f32; 2],
     pub camera_jitter_prev: [f32; 2],
 
-    // Flexible dynamic resolution scaling support
+    ///
+    ///  Flexible dynamic resolution scaling support
     pub resource_size: [u16; 2],
     pub resource_size_prev: [u16; 2],
     pub rect_size: [u16; 2],
     pub rect_size_prev: [u16; 2],
 
-    // (>0) - viewZ = IN_VIEWZ * viewZScale (mostly for FP16 viewZ)
+    ///
+    ///  (>0) - viewZ = IN_VIEWZ * viewZScale (mostly for FP16 viewZ)
     pub view_z_scale: f32,
 
-    // (Optional) (ms) - user provided if > 0, otherwise - tracked internally
+    ///
+    ///  (Optional) (ms) - user provided if > 0, otherwise - tracked internally
     pub time_delta_between_frames: f32,
 
-    // (units > 0) - use TLAS or tracing range
-    // It's highly recommended to use "viewZ > denoisingRange" for INF (sky) pixels
+    ///
+    ///  (units > 0) - use TLAS or tracing range
+    ///
+    ///  It's highly recommended to use "viewZ > denoisingRange" for INF (sky) pixels
     pub denoising_range: f32,
 
-    // [0.01; 0.02] - two samples considered occluded if relative distance difference is greater than this slope-scaled threshold
+    ///
+    ///  [0.01; 0.02] - two samples considered occluded if relative distance difference is greater than this slope-scaled threshold
     pub disocclusion_threshold: f32,
 
-    // (Optional) [0.02; 0.2] - an alternative disocclusion threshold, which is mixed to based on:
-    // - "strandThickness", if there is "strandMaterialID" match
-    // - IN_DISOCCLUSION_THRESHOLD_MIX texture, if "isDisocclusionThresholdMixAvailable = true" (has higher priority and ignores "strandMaterialID")    pub disocclusion_threshold_alternate: f32,
+    ///
+    ///  (Optional) [0.02; 0.2] - an alternative disocclusion threshold, which is mixed to based on:
+    ///
+    ///  - "strandThickness", if there is "strandMaterialID" match
+    ///
+    ///  - IN_DISOCCLUSION_THRESHOLD_MIX texture, if "isDisocclusionThresholdMixAvailable = true" (has higher priority and ignores "strandMaterialID")    pub disocclusion_threshold_alternate: f32,
     pub disocclusion_threshold_alternate: f32,
 
-    // (Optional) (>=0) - marks reflections of camera attached objects (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
-    // This material ID marks reflections of objects attached to the camera, not objects themselves. Unfortunately, this is only an improvement
-    // for critical cases, but not a generic solution. A generic solution requires reflection MVs, which NRD currently doesn't ask for
+    ///
+    ///  (Optional) (>=0) - marks reflections of camera attached objects (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+    ///
+    ///  This material ID marks reflections of objects attached to the camera, not objects themselves. Unfortunately, this is only an improvement
+    ///
+    ///  for critical cases, but not a generic solution. A generic solution requires reflection MVs, which NRD currently doesn't ask for
     pub camera_attached_reflection_material_id: f32,
 
-    // (Optional) (>=0) - marks hair (grass) geometry to enable "under-the-hood" tweaks (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+    ///
+    ///  (Optional) (>=0) - marks hair (grass) geometry to enable "under-the-hood" tweaks (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
     pub strand_material_id: f32,
 
-    // (units > 0) - defines how "disocclusionThreshold" blends into "disocclusionThresholdAlternate" = pixelSize / (pixelSize + strandThickness)
+    ///
+    ///  (units > 0) - defines how "disocclusionThreshold" blends into "disocclusionThresholdAlternate" = pixelSize / (pixelSize + strandThickness)
     pub strand_thickness: f32,
 
-    // [0; 1] - enables "noisy input / denoised output" comparison
+    ///
+    ///  [0; 1] - enables "noisy input / denoised output" comparison
     pub split_screen: f32,
 
-    // For internal needs
+    ///
+    ///  For internal needs
     pub printf_at: [u16; 2],
-    // For internal needs
+    ///
+    ///  For internal needs
     pub debug: f32,
 
-    // (Optional) (pixels) - viewport origin
-    // IMPORTANT: gets applied only to non-noisy guides (aka g-buffer), including IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE,
-    // IN_DISOCCLUSION_THRESHOLD_MIX and IN_BASECOLOR_METALNESS. Must be manually enabled via NRD_USE_VIEWPORT_OFFSET macro switch
+    ///
+    ///  (Optional) (pixels) - viewport origin
+    ///
+    ///  IMPORTANT: gets applied only to non-noisy guides (aka g-buffer), including IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE,
+    ///
+    ///  IN_DISOCCLUSION_THRESHOLD_MIX and IN_BASECOLOR_METALNESS. Must be manually enabled via NRD_USE_VIEWPORT_OFFSET macro switch
     pub rect_origin: [u32; 2],
 
-    // A consecutive number
+    ///
+    ///  A consecutive number
     pub frame_index: u32,
 
-    // To reset history set to RESTART / CLEAR_AND_RESTART for one frame
+    ///
+    ///  To reset history set to RESTART / CLEAR_AND_RESTART for one frame
     pub accumulation_mode: AccumulationMode,
 
-    // If "true" IN_MV is 3D motion in world-space (0 should be everywhere if the scene is static),
-    // otherwise it's 2D (+ optional Z delta) screen-space motion (0 should be everywhere if the camera doesn't move) (recommended value = true)
+    ///
+    ///  If "true" IN_MV is 3D motion in world-space (0 should be everywhere if the scene is static),
+    ///
+    ///  otherwise it's 2D (+ optional Z delta) screen-space motion (0 should be everywhere if the camera doesn't move) (recommended value = true)
     pub is_motion_vector_in_world_space: bool,
 
-    // If "true" IN_DIFF_CONFIDENCE and IN_SPEC_CONFIDENCE are available
+    ///
+    ///  If "true" IN_DIFF_CONFIDENCE and IN_SPEC_CONFIDENCE are available
     pub is_history_confidence_available: bool,
 
-    // If "true" IN_DISOCCLUSION_THRESHOLD_MIX is available
+    ///
+    ///  If "true" IN_DISOCCLUSION_THRESHOLD_MIX is available
     pub is_disocclusion_threshold_mix_available: bool,
 
-    // If "true" IN_BASECOLOR_METALNESS is available
+    ///
+    ///  If "true" IN_BASECOLOR_METALNESS is available
     pub is_base_color_metalness_available: bool,
 
-    // Enables debug overlay in OUT_VALIDATION, requires "InstanceCreationDesc::allowValidation = true"
+    ///
+    ///  Enables debug overlay in OUT_VALIDATION, requires "InstanceCreationDesc::allowValidation = true"
     pub enable_validation: bool,
 }
 impl Default for CommonSettings {
@@ -861,11 +900,6 @@ impl Default for HitDistanceParameters {
     }
 }
 
-// Antilag logic:
-//    delta = ( abs( old - new ) - localVariance * sigmaScale ) / ( max( old, new ) + localVariance * sigmaScale + sensitivityToDarkness )
-//    delta = LinearStep( thresholdMax, thresholdMin, delta )
-//        - 1 - keep accumulation
-//        - 0 - history reset
 #[repr(C)]
 #[derive(Clone)]
 pub struct ReblurAntilagSettings {
@@ -939,7 +973,7 @@ pub struct ReblurSettings {
     // [0; REBLUR_MAX_HISTORY_FRAME_NUM] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
     pub history_fix_frame_num: u32,
 
-    // (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, recommended in case of probabilistic sampling)
+    /// (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, recommended in case of probabilistic sampling)
     pub diffuse_prepass_blur_radius: f32,
     pub specular_prepass_blur_radius: f32,
 
