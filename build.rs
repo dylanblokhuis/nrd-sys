@@ -24,18 +24,17 @@
 // }
 
 fn main() {
-    // for (download_name, install_path) in get_install_path() {
-    //     if !std::fs::exists(&install_path).expect("Unable to check library file location") {
-    //         let data = sysreq::get(format!(
-    //             "https://github.com/dust-engine/nrd-sys/releases/download/v0.2/{}",
-    //             download_name
-    //         ))
-    //         .expect("Download file error");
-    //         let mut file =
-    //             std::fs::File::create(install_path).expect("Unable to create library file");
-    //         file.write_all(&data).expect("Unable to write library file");
-    //     }
-    // }
+    // ./Include/NRD.h
+
+    bindgen::Builder::default()
+        .header("Include/NRD.h")
+        .clang_arg("-IInclude")
+        .clang_arg("-xc++")
+        .clang_arg("-std=c++14")
+        .generate()
+        .expect("Unable to generate bindings")
+        .write_to_file("src/ffi.rs")
+        .expect("Couldn't write bindings!");
 
     println!("cargo:rustc-link-lib=NRD");
     // println!(
