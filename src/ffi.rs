@@ -836,6 +836,9 @@ pub struct DispatchDesc {
     pub grid_width: u16,
     pub grid_height: u16,
 }
+unsafe impl Send for DispatchDesc {}
+unsafe impl Sync for DispatchDesc {}
+
 impl DispatchDesc {
     pub fn constant_buffer(&self) -> &[u8] {
         if self.constant_buffer_data.is_null() {

@@ -9,65 +9,45 @@ pub use ffi::{
     ResourceType, SPIRVBindingOffsets, Sampler, SigmaSettings, TextureDesc,
 };
 mod allocator {
-    use std::alloc::{alloc, dealloc, Layout};
+    use allocator_api2::alloc::{Allocator, Global};
+    use std::alloc::Layout;
     use std::ffi::c_void;
-    use std::ptr;
-
-    /// A plain malloc-based allocate callback
-    #[no_mangle]
+    use std::ptr::NonNull;
     pub extern "C" fn allocate(
         _user_arg: *const c_void,
         size: usize,
         alignment: usize,
     ) -> *mut c_void {
-        // SAFETY: `from_size_align_unchecked` is fine because the C API promises
-        // to only ever ask for sane size+alignment pairs.
-        let layout = unsafe { Layout::from_size_align_unchecked(size, alignment) };
-        let ptr = unsafe { alloc(layout) };
-        if ptr.is_null() {
-            ptr::null_mut()
-        } else {
-            ptr as *mut c_void
+        unsafe {
+            match Global.allocate(Layout::from_size_align_unchecked(size, alignment)) {
+                Ok(ptr) => ptr.as_ptr() as *mut c_void,
+                Err(_) => std::ptr::null_mut(),
+            }
         }
     }
-
-    /// A realloc callback built on std::alloc::realloc
-    #[no_mangle]
     pub extern "C" fn reallocate(
-        _user_arg: *const c_void,
+        user_arg: *const c_void,
         memory: *mut c_void,
         old_size: usize,
         old_alignment: usize,
         new_size: usize,
         new_alignment: usize,
     ) -> *mut c_void {
-        // first deallocate the old block, then alloc a new one:
-        // (you could also use `std::alloc::realloc` directly, see below)
-        free(_user_arg, memory, old_size, old_alignment);
-        allocate(_user_arg, new_size, new_alignment)
-
-        // OR — if you trust the allocator to do in-place grow/shrink:
-        /*
-        let old_layout = unsafe { Layout::from_size_align_unchecked(old_size, old_alignment) };
-        let new_ptr = unsafe { realloc(memory as *mut u8, old_layout, new_size) };
-        new_ptr as *mut c_void
-        */
+        free(user_arg, memory, old_size, old_alignment);
+        allocate(user_arg, new_size, new_alignment)
     }
-
-    /// A deallocate callback
-    #[no_mangle]
     pub extern "C" fn free(
         _user_arg: *const c_void,
         memory: *mut c_void,
         size: usize,
         alignment: usize,
     ) {
-        if memory.is_null() {
-            return;
-        }
-        let layout = unsafe { Layout::from_size_align_unchecked(size, alignment) };
+        let memory = NonNull::new(memory).unwrap();
         unsafe {
-            dealloc(memory as *mut u8, layout);
+            Global.deallocate(
+                memory.cast(),
+                Layout::from_size_align_unchecked(size, alignment),
+            )
         }
     }
 }

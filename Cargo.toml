@@ -10,6 +10,7 @@ readme = "README.md"
 repository = "https://github.com/dust-engine/nrd-sys"
 
 [dependencies]
+allocator-api2 = "0.3.0"
 
 [build-dependencies]
 sysreq = "0"
