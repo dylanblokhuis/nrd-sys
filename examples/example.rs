@@ -1,7 +1,7 @@
 fn main() {
     let desc = nrd_sys::LibraryDesc::new();
 
-    let instance = desc.create_instance(&nrd_sys::ffi::nrd_InstanceCreationDesc {
+    let mut instance = desc.create_instance(&nrd_sys::ffi::nrd_InstanceCreationDesc {
         allocationCallbacks: nrd_sys::ffi::nrd_AllocationCallbacks {
             Allocate: None,
             Free: None,

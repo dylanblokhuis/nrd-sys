@@ -41,8 +41,22 @@ fn main() {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let nrd_lib_path = std::path::Path::new(&out_dir).join("libNRD.dylib");
     if !nrd_lib_path.exists() {
-        std::fs::copy("Include/libNRD.dylib", &nrd_lib_path)
-            .expect("Failed to copy libNRD.dylib to OUT_DIR");
+        #[cfg(target_os = "macos")]
+        {
+            std::fs::copy("Include/libNRD.dylib", &nrd_lib_path)
+                .expect("Failed to copy libNRD.dylib to OUT_DIR");
+        }
+        #[cfg(target_os = "linux")]
+        {
+            let so_path = std::path::Path::new(&out_dir).join("libNRD.so");
+            std::fs::copy("Include/libNRD.so", &so_path)
+                .expect("Failed to copy libNRD.so to OUT_DIR");
+        }
+        #[cfg(target_os = "windows")]
+        {
+            let dll_path = std::path::Path::new(&out_dir).join("NRD.dll");
+            std::fs::copy("Include/NRD.dll", &dll_path).expect("Failed to copy NRD.dll to OUT_DIR");
+        }
     }
 
     bindgen::Builder::default()

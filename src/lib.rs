@@ -173,7 +173,27 @@ pub struct LibraryDesc(*const ffi::nrd_LibraryDesc);
 
 impl LibraryDesc {
     pub fn new() -> Self {
+        // verify versions
+
         let desc = unsafe { ffi::nrd_GetLibraryDesc() };
+        unsafe {
+            assert_eq!(
+                ffi::NRD_VERSION_MAJOR,
+                (*desc).versionMajor as u32,
+                "NRD version mismatch"
+            );
+            assert_eq!(
+                ffi::NRD_VERSION_MINOR,
+                (*desc).versionMinor as u32,
+                "NRD version mismatch"
+            );
+            assert_eq!(
+                ffi::NRD_VERSION_BUILD,
+                (*desc).versionBuild as u32,
+                "NRD version mismatch"
+            );
+        }
+
         Self(desc)
     }
 
@@ -273,7 +293,7 @@ impl Instance {
         }
     }
 
-    pub fn set_common_settings(&self, settings: &ffi::nrd_CommonSettings) {
+    pub fn set_common_settings(&mut self, settings: &ffi::nrd_CommonSettings) {
         check_result(unsafe { ffi::nrd_SetCommonSettings(self.0, &*settings) });
     }
 
@@ -315,7 +335,7 @@ impl Instance {
     }
 
     pub fn set_reblur_settings(
-        &self,
+        &mut self,
         identifier: ffi::nrd_Identifier,
         settings: &ffi::nrd_ReblurSettings,
     ) {
