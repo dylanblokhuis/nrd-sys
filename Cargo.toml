@@ -13,4 +13,5 @@ repository = "https://github.com/dust-engine/nrd-sys"
 allocator-api2 = "0.3.0"
 
 [build-dependencies]
+bindgen = "0.72.0"
 sysreq = "0"

@@ -37,9 +37,28 @@ fn main() {
     //     }
     // }
 
+    // copy NRD.dylib to OUT_DIR
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let nrd_lib_path = std::path::Path::new(&out_dir).join("libNRD.dylib");
+    if !nrd_lib_path.exists() {
+        std::fs::copy("Include/libNRD.dylib", &nrd_lib_path)
+            .expect("Failed to copy libNRD.dylib to OUT_DIR");
+    }
+
+    bindgen::Builder::default()
+        .header("Include/NRD.h")
+        .clang_arg("-IInclude")
+        .clang_arg("-xc++")
+        .clang_arg("-std=c++14")
+        .clang_arg("-stdlib=libc++")
+        .generate()
+        .expect("Unable to generate bindings")
+        .write_to_file("src/ffi.rs")
+        .expect("Couldn't write bindings!");
+
     println!("cargo:rustc-link-lib=NRD");
-    // println!(
-    //     "cargo:rustc-link-search={}",
-    //     std::env::var("OUT_DIR").unwrap()
-    // );
+    println!(
+        "cargo:rustc-link-search={}",
+        std::env::var("OUT_DIR").unwrap()
+    );
 }
