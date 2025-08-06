@@ -1,4 +1,4 @@
-/*
+/**
 Copyright (c) 2022, NVIDIA CORPORATION. All rights reserved.
 
 NVIDIA CORPORATION and its licensors retain all intellectual property
@@ -17,31 +17,33 @@ static_assert(NRD_VERSION_MAJOR == NRD_SETTINGS_VERSION_MAJOR && NRD_VERSION_MIN
 
 namespace nrd
 {
-    //====================================================================================================================================================
-    // COMMON
-    //====================================================================================================================================================
+    /** ====================================================================================================================================================
+     * COMMON
+     * ====================================================================================================================================================*/
 
-    // IMPORTANT: despite that all NRD accumulation related settings are measured in "frames" (for simplicity), it's recommended to recalculate the
-    // number of accumulated frames from the accumulation time (in seconds). It allows to minimize lags if FPS is low and maximize IQ if FPS is high.
-    // All default values provided for 60 FPS. Each denoiser has a recommended accumulation time constant and absolute maximum of accumulated frames
-    // to clamp to:
+    /** IMPORTANT: despite that all NRD accumulation related settings are measured in "frames" (for simplicity), it's recommended to recalculate the
+     * number of accumulated frames from the accumulation time (in seconds). It allows to minimize lags if FPS is low and maximize IQ if FPS is high.
+     * All default values provided for 60 FPS. Each denoiser has a recommended accumulation time constant and absolute maximum of accumulated frames
+     * to clamp to:
+     */
     inline uint32_t GetMaxAccumulatedFrameNum(float accumulationTime, float fps)
     {
         return (uint32_t)(accumulationTime * fps);
     }
 
-    // Sequence is based on "CommonSettings::frameIndex":
-    //     Even frame (0)  Odd frame (1)   ...
-    //         B W             W B
-    //         W B             B W
-    //     BLACK and WHITE modes define cells with VALID data
-    // Checkerboard can be only horizontal
-    // Notes:
-    //     - if checkerboarding is enabled, "mode" defines the orientation of even numbered frames
-    //     - all inputs have the same resolution - logical FULL resolution
-    //     - noisy input signals ("IN_DIFF_XXX / IN_SPEC_XXX") are tightly packed to the LEFT HALF of the texture (the input pixel = 2x1 screen pixel)
-    //     - for others the input pixel = 1x1 screen pixel
-    //     - upsampling will be handled internally in checkerboard mode
+    /** Sequence is based on "CommonSettings::frameIndex":
+     *     Even frame (0)  Odd frame (1)   ...
+     *         B W             W B
+     *         W B             B W
+     *     BLACK and WHITE modes define cells with VALID data
+     * Checkerboard can be only horizontal
+     * Notes:
+     *     - if checkerboarding is enabled, "mode" defines the orientation of even numbered frames
+     *     - all inputs have the same resolution - logical FULL resolution
+     *     - noisy input signals ("IN_DIFF_XXX / IN_SPEC_XXX") are tightly packed to the LEFT HALF of the texture (the input pixel = 2x1 screen pixel)
+     *     - for others the input pixel = 1x1 screen pixel
+     *     - upsampling will be handled internally in checkerboard mode
+     */
     enum class CheckerboardMode : uint8_t
     {
         OFF,
@@ -53,13 +55,13 @@ namespace nrd
 
     enum class AccumulationMode : uint8_t
     {
-        // Common mode (accumulation continues normally)
+        /** Common mode (accumulation continues normally) */
         CONTINUE,
 
-        // Discards history and resets accumulation
+        /** Discards history and resets accumulation */
         RESTART,
 
-        // Like RESTART, but additionally clears resources from potential garbage
+        /** Like RESTART, but additionally clears resources from potential garbage */
         CLEAR_AND_RESTART,
 
         MAX_NUM
@@ -67,45 +69,49 @@ namespace nrd
 
     enum class HitDistanceReconstructionMode : uint8_t
     {
-        // Probabilistic split at primary hit is not used, hence hit distance is always valid (reconstruction is not needed)
+        /** Probabilistic split at primary hit is not used, hence hit distance is always valid (reconstruction is not needed) */
         OFF,
 
-        // If hit distance is invalid due to probabilistic sampling, reconstruct using 3x3 neighbors.
-        // Probability at primary hit must be clamped to [1/4; 3/4] range to guarantee a sample in this area.
-        // White noise must be replaced with Bayer dithering to gurantee a sample in this area (see NRD sample)
+        /** If hit distance is invalid due to probabilistic sampling, reconstruct using 3x3 neighbors.
+         * Probability at primary hit must be clamped to [1/4; 3/4] range to guarantee a sample in this area.
+         * White noise must be replaced with Bayer dithering to gurantee a sample in this area (see NRD sample)
+         */
         AREA_3X3,
 
-        // If hit distance is invalid due to probabilistic sampling, reconstruct using 5x5 neighbors.
-        // Probability at primary hit must be clamped to [1/16; 15/16] range to guarantee a sample in this area.
-        // White noise must be replaced with Bayer dithering to gurantee a sample in this area (see NRD sample)
+        /** If hit distance is invalid due to probabilistic sampling, reconstruct using 5x5 neighbors.
+         * Probability at primary hit must be clamped to [1/16; 15/16] range to guarantee a sample in this area.
+         * White noise must be replaced with Bayer dithering to gurantee a sample in this area (see NRD sample)
+         */
         AREA_5X5,
 
         MAX_NUM
     };
 
-    // IMPORTANT: if "unit" is not "meter", all default values must be converted from "meters" to "units"!
+    /** IMPORTANT: if "unit" is not "meter", all default values must be converted from "meters" to "units"! */
 
     struct CommonSettings
     {
-        // Matrix requirements:
-        //     - usage - vector is a column
-        //     - layout - column-major
-        //     - non jittered!
-        // LH / RH projection matrix (INF far plane is supported) with non-swizzled rows, i.e. clip-space depth = z / w
+        /** Matrix requirements:
+         *     - usage - vector is a column
+         *     - layout - column-major
+         *     - non jittered!
+         * LH / RH projection matrix (INF far plane is supported) with non-swizzled rows, i.e. clip-space depth = z / w
+         */
         float viewToClipMatrix[16] = {};
 
-        // Previous projection matrix
+        /** Previous projection matrix */
         float viewToClipMatrixPrev[16] = {};
 
-        // World-space to camera-space matrix
+        /** World-space to camera-space matrix */
         float worldToViewMatrix[16] = {};
 
-        // If coordinate system moves with the camera, camera delta must be included to reflect camera motion
+        /** If coordinate system moves with the camera, camera delta must be included to reflect camera motion */
         float worldToViewMatrixPrev[16] = {};
 
-        // (Optional) previous world-space to current world-space matrix. It is for virtual normals, where a coordinate
-        // system of the virtual space changes frame to frame, such as in a case of animated intermediary reflecting
-        // surfaces when primary surface replacement is used for them.
+        /** (Optional) previous world-space to current world-space matrix. It is for virtual normals, where a coordinate
+         * system of the virtual space changes frame to frame, such as in a case of animated intermediary reflecting
+         * surfaces when primary surface replacement is used for them.
+         */
         float worldPrevToWorldMatrix[16] = {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
@@ -113,118 +119,126 @@ namespace nrd
             0.0f, 0.0f, 0.0f, 1.0f
         };
 
-        // Used as "mv = IN_MV * motionVectorScale" (use .z = 0 for 2D screen-space motion)
-        // Expected usage: "pixelUvPrev = pixelUv + mv.xy" (where "pixelUv" is in (0; 1) range)
+        /** Used as "mv = IN_MV * motionVectorScale" (use .z = 0 for 2D screen-space motion)
+         * Expected usage: "pixelUvPrev = pixelUv + mv.xy" (where "pixelUv" is in (0; 1) range)
+         */
         float motionVectorScale[3] = {1.0f, 1.0f, 0.0f};
 
-        // [-0.5; 0.5] - sampleUv = pixelUv + cameraJitter
+        /** [-0.5; 0.5] - sampleUv = pixelUv + cameraJitter */
         float cameraJitter[2] = {};
         float cameraJitterPrev[2] = {};
 
-        // Flexible dynamic resolution scaling support
+        /** Flexible dynamic resolution scaling support */
         uint16_t resourceSize[2] = {};
         uint16_t resourceSizePrev[2] = {};
         uint16_t rectSize[2] = {};
         uint16_t rectSizePrev[2] = {};
 
-        // (>0) - "viewZ = IN_VIEWZ * viewZScale" (mostly for FP16 viewZ)
+        /** (>0) - "viewZ = IN_VIEWZ * viewZScale" (mostly for FP16 viewZ) */
         float viewZScale = 1.0f;
 
-        // (Optional) (ms) - user provided if > 0, otherwise - tracked internally
+        /** (Optional) (ms) - user provided if > 0, otherwise - tracked internally */
         float timeDeltaBetweenFrames = 0.0f;
 
-        // (units > 0) - use TLAS or tracing range
-        // It's highly recommended to use "viewZ > denoisingRange" for INF (sky) pixels
+        /** (units > 0) - use TLAS or tracing range
+         * It's highly recommended to use "viewZ > denoisingRange" for INF (sky) pixels
+         */
         float denoisingRange = 500000.0f;
 
-        // [0.01; 0.02] - two samples considered occluded if relative distance difference is greater than this slope-scaled threshold
+        /** [0.01; 0.02] - two samples considered occluded if relative distance difference is greater than this slope-scaled threshold */
         float disocclusionThreshold = 0.01f;
 
-        // (Optional) [0.02; 0.2] - an alternative disocclusion threshold, which is mixed to based on:
-        // - "strandThickness", if there is "strandMaterialID" match
-        // - "IN_DISOCCLUSION_THRESHOLD_MIX" texture, if "isDisocclusionThresholdMixAvailable = true" (has higher priority and ignores "strandMaterialID")
+        /** (Optional) [0.02; 0.2] - an alternative disocclusion threshold, which is mixed to based on:
+         * - "strandThickness", if there is "strandMaterialID" match
+         * - "IN_DISOCCLUSION_THRESHOLD_MIX" texture, if "isDisocclusionThresholdMixAvailable = true" (has higher priority and ignores "strandMaterialID")
+         */
         float disocclusionThresholdAlternate = 0.05f;
 
-        // (Optional) (>=0) - marks reflections of camera attached objects (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
-        // This material ID marks reflections of objects attached to the camera, not objects themselves. Unfortunately, this is only an improvement
-        // for critical cases, but not a generic solution. A generic solution requires reflection MVs, which NRD currently doesn't ask for
+        /** (Optional) (>=0) - marks reflections of camera attached objects (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+         * This material ID marks reflections of objects attached to the camera, not objects themselves. Unfortunately, this is only an improvement
+         * for critical cases, but not a generic solution. A generic solution requires reflection MVs, which NRD currently doesn't ask for
+         */
         float cameraAttachedReflectionMaterialID = 999.0f;
 
-        // (Optional) (>=0) - marks hair (grass) geometry to enable "under-the-hood" tweaks (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+        /** (Optional) (>=0) - marks hair (grass) geometry to enable "under-the-hood" tweaks (requires "NormalEncoding::R10_G10_B10_A2_UNORM") */
         float strandMaterialID = 999.0f;
 
-        // (units > 0) - defines how "disocclusionThreshold" blends into "disocclusionThresholdAlternate" = pixelSize / (pixelSize + strandThickness)
+        /** (units > 0) - defines how "disocclusionThreshold" blends into "disocclusionThresholdAlternate" = pixelSize / (pixelSize + strandThickness) */
         float strandThickness = 80e-6f;
 
-        // [0; 1] - enables "noisy input / denoised output" comparison
+        /** [0; 1] - enables "noisy input / denoised output" comparison */
         float splitScreen = 0.0f;
 
-        // (Optional) for internal needs
-        uint16_t printfAt[2] = {9999, 9999}; // thread (pixel) position
+        /** (Optional) for internal needs */
+        uint16_t printfAt[2] = {9999, 9999}; /** thread (pixel) position */
         float debug = 0.0f;
 
-        // (Optional) (pixels) - viewport origin
-        // IMPORTANT: gets applied only to non-noisy guides (aka g-buffer), including "IN_DIFF_CONFIDENCE", "IN_SPEC_CONFIDENCE",
-        // "IN_DISOCCLUSION_THRESHOLD_MIX" and "IN_BASECOLOR_METALNESS". Used only if "NRD_SUPPORTS_VIEWPORT_OFFSET = 1"
+        /** (Optional) (pixels) - viewport origin
+         * IMPORTANT: gets applied only to non-noisy guides (aka g-buffer), including "IN_DIFF_CONFIDENCE", "IN_SPEC_CONFIDENCE",
+         * "IN_DISOCCLUSION_THRESHOLD_MIX" and "IN_BASECOLOR_METALNESS". Used only if "NRD_SUPPORTS_VIEWPORT_OFFSET = 1"
+         */
         uint32_t rectOrigin[2] = {};
 
-        // A consecutively growing number. Valid usage:
-        // - must be incremented by 1 on each frame (not by 1 on each "SetCommonSettings" call)
-        // - sequence can be restarted after passing "AccumulationMode != CONTINUE"
-        // - must be in sync with "CheckerboardMode" (if not OFF)
+        /** A consecutively growing number. Valid usage:
+         * - must be incremented by 1 on each frame (not by 1 on each "SetCommonSettings" call)
+         * - sequence can be restarted after passing "AccumulationMode != CONTINUE"
+         * - must be in sync with "CheckerboardMode" (if not OFF)
+         */
         uint32_t frameIndex = 0;
 
-        // To reset history set to RESTART or CLEAR_AND_RESTART for one frame
+        /** To reset history set to RESTART or CLEAR_AND_RESTART for one frame */
         AccumulationMode accumulationMode = AccumulationMode::CONTINUE;
 
-        // If "true" "IN_MV" is 3D motion in world-space (0 should be everywhere if the scene is static, camera motion must not be included),
-        // otherwise it's 2D (+ optional Z delta) screen-space motion (0 should be everywhere if the camera doesn't move)
+        /** If "true" "IN_MV" is 3D motion in world-space (0 should be everywhere if the scene is static, camera motion must not be included),
+         * otherwise it's 2D (+ optional Z delta) screen-space motion (0 should be everywhere if the camera doesn't move)
+         */
         bool isMotionVectorInWorldSpace = false;
 
-        // If "true" "IN_DIFF_CONFIDENCE" and "IN_SPEC_CONFIDENCE" are available
+        /** If "true" "IN_DIFF_CONFIDENCE" and "IN_SPEC_CONFIDENCE" are available */
         bool isHistoryConfidenceAvailable = false;
 
-        // If "true" "IN_DISOCCLUSION_THRESHOLD_MIX" is available
+        /** If "true" "IN_DISOCCLUSION_THRESHOLD_MIX" is available */
         bool isDisocclusionThresholdMixAvailable = false;
 
-        // If "true" "IN_BASECOLOR_METALNESS" is available
+        /** If "true" "IN_BASECOLOR_METALNESS" is available */
         bool isBaseColorMetalnessAvailable = false;
 
-        // Enables debug overlay in OUT_VALIDATION
+        /** Enables debug overlay in OUT_VALIDATION */
         bool enableValidation = false;
     };
 
-    //====================================================================================================================================================
-    // REBLUR
-    //====================================================================================================================================================
+    /** ====================================================================================================================================================
+     * REBLUR
+     * ==================================================================================================================================================== */
 
     const uint32_t REBLUR_MAX_HISTORY_FRAME_NUM = 63;
     const float REBLUR_DEFAULT_ACCUMULATION_TIME = 0.5f; // sec
 
-    // "Normalized hit distance" = saturate( "hit distance" / f ), where:
-    // f = ( A + viewZ * B ) * lerp( 1.0, C, exp2( D * roughness ^ 2 ) ), see "NRD.hlsl/REBLUR_FrontEnd_GetNormHitDist"
+    /** "Normalized hit distance" = saturate( "hit distance" / f ), where:
+     * f = ( A + viewZ * B ) * lerp( 1.0, C, exp2( D * roughness ^ 2 ) ), see "NRD.hlsl/REBLUR_FrontEnd_GetNormHitDist"
+     */
     struct HitDistanceParameters
     {
-        // (units > 0) - constant value
+        /** (units > 0) - constant value */
         float A = 3.0f;
 
-        // (> 0) - viewZ based linear scale (1 m - 10 cm, 10 m - 1 m, 100 m - 10 m)
+        /** (> 0) - viewZ based linear scale (1 m - 10 cm, 10 m - 1 m, 100 m - 10 m) */
         float B = 0.1f;
 
-        // (>= 1) - roughness based scale, use values > 1 to get bigger hit distance for low roughness
+        /** (>= 1) - roughness based scale, use values > 1 to get bigger hit distance for low roughness */
         float C = 20.0f;
 
-        // (<= 0) - absolute value should be big enough to collapse "exp2( D * roughness ^ 2 )" to "~0" for roughness = 1
+        /** (<= 0) - absolute value should be big enough to collapse "exp2( D * roughness ^ 2 )" to "~0" for roughness = 1 */
         float D = -25.0f;
     };
 
     struct ReblurAntilagSettings
     {
-        // [1; 5] - delta is reduced by local variance multiplied by this value
-        float luminanceSigmaScale = 4.0f; // can be 3.0 or even less if signal is good
+        /** [1; 5] - delta is reduced by local variance multiplied by this value */
+        float luminanceSigmaScale = 4.0f; /** can be 3.0 or even less if signal is good */
 
-        // [1; 5] - antilag sensitivity (smaller values increase sensitivity)
-        float luminanceSensitivity = 3.0f; // can be 2.0 or even less if signal is good
+        /** [1; 5] - antilag sensitivity (smaller values increase sensitivity) */
+        float luminanceSensitivity = 3.0f; /** can be 2.0 or even less if signal is good */
     };
 
     struct ReblurSettings
@@ -232,81 +246,84 @@ namespace nrd
         HitDistanceParameters hitDistanceParameters = {};
         ReblurAntilagSettings antilagSettings = {};
 
-        // [0; REBLUR_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames
+        /** [0; REBLUR_MAX_HISTORY_FRAME_NUM] - maximum number of linearly accumulated frames */ 
         uint32_t maxAccumulatedFrameNum = 30;
 
-        // [0; maxAccumulatedFrameNum) - maximum number of linearly accumulated frames for fast history
-        // Values ">= maxAccumulatedFrameNum" disable fast history
-        // Usually 5x times shorter than the main history
+        /** [0; maxAccumulatedFrameNum) - maximum number of linearly accumulated frames for fast history
+         * Values ">= maxAccumulatedFrameNum" disable fast history
+         * Usually 5x times shorter than the main history
+         */
         uint32_t maxFastAccumulatedFrameNum = 6;
 
-        // [0; maxAccumulatedFrameNum] - maximum number of linearly accumulated frames for stabilized radiance
-        // "0" disables the stabilization pass
-        // Values ">= maxAccumulatedFrameNum"  get clamped to "maxAccumulatedFrameNum"
+        /** [0; maxAccumulatedFrameNum] - maximum number of linearly accumulated frames for stabilized radiance
+         * "0" disables the stabilization pass
+         * Values ">= maxAccumulatedFrameNum"  get clamped to "maxAccumulatedFrameNum"
+         */
         uint32_t maxStabilizedFrameNum = REBLUR_MAX_HISTORY_FRAME_NUM;
 
-        // [0; 3] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
+        /** [0; 3] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum") */
         uint32_t historyFixFrameNum = 3;
 
-        // (> 0) - base stride between pixels in 5x5 history reconstruction kernel (gets reduced over time)
+        /** (> 0) - base stride between pixels in 5x5 history reconstruction kernel (gets reduced over time) */
         uint32_t historyFixBasePixelStride = 14;
 
-        // (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, must be used in case of badly defined signals and probabilistic sampling)
+        /** (pixels) - pre-accumulation spatial reuse pass blur radius (0 = disabled, must be used in case of badly defined signals and probabilistic sampling) */
         float diffusePrepassBlurRadius = 30.0f;
         float specularPrepassBlurRadius = 50.0f;
 
-        // (0; 0.2] - bigger values reduce sensitivity to shadows in spatial passes, smaller values are recommended for signals with relatively clean hit distance (like RTXDI/RESTIR)
+        /** (0; 0.2] - bigger values reduce sensitivity to shadows in spatial passes, smaller values are recommended for signals with relatively clean hit distance (like RTXDI/RESTIR) */
         float minHitDistanceWeight = 0.1f;
 
-        // (pixels) - min denoising radius (for converged state)
+        /** (pixels) - min denoising radius (for converged state) */
         float minBlurRadius = 1.0f;
 
-        // (pixels) - base (max) denoising radius (gets reduced over time)
+        /** (pixels) - base (max) denoising radius (gets reduced over time) */
         float maxBlurRadius = 30.0f;
 
-        // (normalized %) - base fraction of diffuse or specular lobe angle used to drive normal based rejection
+        /** (normalized %) - base fraction of diffuse or specular lobe angle used to drive normal based rejection */
         float lobeAngleFraction = 0.15f;
 
-        // (normalized %) - base fraction of center roughness used to drive roughness based rejection
+        /** (normalized %) - base fraction of center roughness used to drive roughness based rejection */
         float roughnessFraction = 0.15f;
 
-        // [0; 1] - if roughness < this, temporal accumulation becomes responsive and driven by roughness (useful for animated water)
+        /** [0; 1] - if roughness < this, temporal accumulation becomes responsive and driven by roughness (useful for animated water) */
         float responsiveAccumulationRoughnessThreshold = 0.0f;
 
-        // (normalized %) - represents maximum allowed deviation from the local tangent plane
+        /** (normalized %) - represents maximum allowed deviation from the local tangent plane */
         float planeDistanceSensitivity = 0.02f;
 
-        // "IN_MV = lerp(IN_MV, specularMotion, smoothstep(this[0], this[1], specularProbability))"
+        /** "IN_MV = lerp(IN_MV, specularMotion, smoothstep(this[0], this[1], specularProbability))" */
         float specularProbabilityThresholdsForMvModification[2] = {0.5f, 0.9f};
 
-        // [1; 3] - undesired sporadic outliers suppression to keep output stable (smaller values maximize suppression in exchange of bias)
+        /** [1; 3] - undesired sporadic outliers suppression to keep output stable (smaller values maximize suppression in exchange of bias) */
         float fireflySuppressorMinRelativeScale = 2.0f;
 
-        // (Optional) material ID comparison: max(m0, minMaterial) == max(m1, minMaterial) (requires "NormalEncoding::R10_G10_B10_A2_UNORM")
+        /** (Optional) material ID comparison: max(m0, minMaterial) == max(m1, minMaterial) (requires "NormalEncoding::R10_G10_B10_A2_UNORM") */
         float minMaterialForDiffuse = 4.0f;
         float minMaterialForSpecular = 4.0f;
 
-        // If not OFF and used for DIFFUSE_SPECULAR, defines diffuse orientation, specular orientation is the opposite. Used only if "NRD_SUPPORTS_CHECKERBOARD = 1"
+        /** If not OFF and used for DIFFUSE_SPECULAR, defines diffuse orientation, specular orientation is the opposite. Used only if "NRD_SUPPORTS_CHECKERBOARD = 1" */
         CheckerboardMode checkerboardMode = CheckerboardMode::OFF;
 
-        // Must be used only in case of probabilistic sampling (not checkerboarding), when a pixel can be skipped and have "0" (invalid) hit distance
+        /** Must be used only in case of probabilistic sampling (not checkerboarding), when a pixel can be skipped and have "0" (invalid) hit distance */
         HitDistanceReconstructionMode hitDistanceReconstructionMode = HitDistanceReconstructionMode::OFF;
 
-        // Adds bias in case of badly defined signals, but tries to fight with fireflies
+        /** Adds bias in case of badly defined signals, but tries to fight with fireflies */
         bool enableAntiFirefly = false;
 
-        // In rare cases, when bright samples are so sparse that any other bright neighbor can't
-        // be reached, pre-pass transforms a standalone bright pixel into a standalone bright blob,
-        // worsening the situation. Despite that it's a problem of sampling, the denoiser needs to
-        // handle it somehow on its side too. Diffuse pre-pass can be just disabled, but for specular
-        // it's still needed to find optimal hit distance for tracking. This boolean allow to use
-        // specular pre-pass for tracking purposes only (use with care)
+        /** In rare cases, when bright samples are so sparse that any other bright neighbor can't
+         * be reached, pre-pass transforms a standalone bright pixel into a standalone bright blob,
+         * worsening the situation. Despite that it's a problem of sampling, the denoiser needs to
+         * handle it somehow on its side too. Diffuse pre-pass can be just disabled, but for specular
+         * it's still needed to find optimal hit distance for tracking. This boolean allow to use
+         * specular pre-pass for tracking purposes only (use with care)
+         */
         bool usePrepassOnlyForSpecularMotionEstimation = false;
     };
 
-    //====================================================================================================================================================
-    // RELAX
-    //====================================================================================================================================================
+    /** ====================================================================================================================================================
+     * RELAX
+     * ==================================================================================================================================================== */
 
     const uint32_t RELAX_MAX_HISTORY_FRAME_NUM = 255;
     const float RELAX_DEFAULT_ACCUMULATION_TIME = 0.5f; // sec
@@ -342,7 +359,7 @@ namespace nrd
         // Usually 5x times shorter than the main history
         uint32_t specularMaxFastAccumulatedFrameNum = 6;
 
-        // [0; 3] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum")
+        /** [0; 3] - number of reconstructed frames after history reset (less than "maxFastAccumulatedFrameNum") */
         uint32_t historyFixFrameNum = 3;
 
         // (> 0) - base stride between pixels in 5x5 history reconstruction kernel (gets reduced over time)
@@ -419,9 +436,9 @@ namespace nrd
         bool enableRoughnessEdgeStopping = true;
     };
 
-    //====================================================================================================================================================
-    // SIGMA
-    //====================================================================================================================================================
+    /** ====================================================================================================================================================
+     * SIGMA
+     * ==================================================================================================================================================== */
 
     const uint32_t SIGMA_MAX_HISTORY_FRAME_NUM = 7;
     const float SIGMA_DEFAULT_ACCUMULATION_TIME = 0.084f; // sec
@@ -440,9 +457,9 @@ namespace nrd
         uint32_t maxStabilizedFrameNum = 5;
     };
 
-    //====================================================================================================================================================
-    // REFERENCE
-    //====================================================================================================================================================
+    /** ====================================================================================================================================================
+     * REFERENCE
+     * ==================================================================================================================================================== */
 
     const uint32_t REFERENCE_MAX_HISTORY_FRAME_NUM = 4095;
     const float REFERENCE_DEFAULT_ACCUMULATION_TIME = 17.0f; // sec
