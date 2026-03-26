@@ -24,16 +24,16 @@ fn main() {
         }
     }
 
-    bindgen::Builder::default()
-        .header("Include/NRD.h")
-        .clang_arg("-IInclude")
-        .clang_arg("-xc++")
-        .clang_arg("-std=c++14")
-        .clang_arg("-stdlib=libc++")
-        .generate()
-        .expect("Unable to generate bindings")
-        .write_to_file("src/ffi.rs")
-        .expect("Couldn't write bindings!");
+    // bindgen::Builder::default()
+    //     .header("Include/NRD.h")
+    //     .clang_arg("-IInclude")
+    //     .clang_arg("-xc++")
+    //     .clang_arg("-std=c++14")
+    //     .clang_arg("-stdlib=libc++")
+    //     .generate()
+    //     .expect("Unable to generate bindings")
+    //     .write_to_file("src/ffi.rs")
+    //     .expect("Couldn't write bindings!");
 
     println!("cargo:rustc-link-lib=NRD");
     println!(
@@ -100,7 +100,12 @@ pub const EMBEDDED_PIPELINE_COUNT: usize = 0;
     let msl_version = std::env::var("NRD_MSL_VERSION").unwrap_or_else(|_| "20300".into());
     let entry = std::fs::read_to_string(spirv_dir.join("entry_point.txt"))
         .unwrap_or_else(|_| "NRD_CS_MAIN".to_string());
-    let entry = entry.lines().next().unwrap_or("NRD_CS_MAIN").trim().to_string();
+    let entry = entry
+        .lines()
+        .next()
+        .unwrap_or("NRD_CS_MAIN")
+        .trim()
+        .to_string();
     if entry.is_empty() {
         panic!("embed/spirv/entry_point.txt is empty");
     }
@@ -139,7 +144,9 @@ pub const EMBEDDED_PIPELINE_COUNT: usize = 0;
             "static MSL_{i}: &str = include_str!(concat!(env!(\"OUT_DIR\"), \"/msl/{i:03}.metal\"));\n"
         ));
     }
-    lines.push_str("pub fn msl_shader_for_pipeline(index: usize) -> Option<super::MslShaderDesc> {\n");
+    lines.push_str(
+        "pub fn msl_shader_for_pipeline(index: usize) -> Option<super::MslShaderDesc> {\n",
+    );
     lines.push_str("    let source = match index {\n");
     for i in 0..n {
         lines.push_str(&format!("        {i} => MSL_{i},\n"));
@@ -148,7 +155,9 @@ pub const EMBEDDED_PIPELINE_COUNT: usize = 0;
     lines.push_str("    };\n");
     lines.push_str("    Some(super::MslShaderDesc { source })\n");
     lines.push_str("}\n");
-    lines.push_str(&format!("pub const EMBEDDED_PIPELINE_COUNT: usize = {n};\n"));
+    lines.push_str(&format!(
+        "pub const EMBEDDED_PIPELINE_COUNT: usize = {n};\n"
+    ));
 
     std::fs::write(&gen_path, lines).expect("write embedded_msl.rs");
 }
