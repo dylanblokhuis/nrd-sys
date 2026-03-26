@@ -1,54 +1,49 @@
 fn main() {
-    let desc = nrd_sys::LibraryDesc::new();
+    let _lib = nrd_sys::LibraryInfo::query().expect(
+        "linked libNRD major.minor must match this crate's headers; update Include/libNRD or regenerate ffi",
+    );
 
-    let mut instance = desc.create_instance(&nrd_sys::ffi::nrd_InstanceCreationDesc {
-        allocationCallbacks: nrd_sys::ffi::nrd_AllocationCallbacks {
-            Allocate: None,
-            Free: None,
-            Reallocate: None,
-            userArg: std::ptr::null_mut(),
-        },
-        denoisers: &nrd_sys::ffi::nrd_DenoiserDesc {
-            identifier: 0,
-            denoiser: nrd_sys::Denoiser::ReblurDiffuse as u32,
-        },
-        denoisersNum: 1,
-    });
+    let mut instance = nrd_sys::Instance::try_new_denoisers(&[nrd_sys::DenoiserSlot {
+        identifier: nrd_sys::Identifier(0),
+        denoiser: nrd_sys::Denoiser::ReblurDiffuse,
+    }])
+    .expect("Create NRD instance");
 
-    let desc = instance.get_desc();
-    let common_settings = instance.get_default_common_settings();
-    let reblur_settings = instance.get_default_reblur_settings();
+    let inst_desc = instance.description().expect("instance description");
+    for view in inst_desc.pipelines_with_msl() {
+        let spirv = unsafe {
+            std::slice::from_raw_parts(
+                view.pipeline.computeShaderSPIRV.bytecode as *const u8,
+                view.pipeline.computeShaderSPIRV.size as usize,
+            )
+        };
+        println!("SPIRV size: {} bytes", spirv.len());
+        if let Some(msl) = view.compute_shader_msl {
+            println!("embedded MSL size: {} bytes", msl.size());
+        }
+        println!("{:#?}", view);
+    }
+    println!("{:#?}", inst_desc.raw());
 
-    instance.set_common_settings(&common_settings);
-    instance.set_reblur_settings(0, &reblur_settings);
+    let mut common_settings = nrd_sys::default_common_settings();
+    common_settings.resourceSize = [1920, 1080];
+    common_settings.rectSize = [1920, 1080];
 
-    let dispatches = instance.get_dispatches(&[0]);
+    let reblur_settings = nrd_sys::default_reblur_settings();
+
+    instance
+        .set_common_settings(&common_settings)
+        .expect("SetCommonSettings");
+    instance
+        .set_reblur_settings(nrd_sys::Identifier(0), &reblur_settings)
+        .expect("SetDenoiserSettings (REBLUR)");
+
+    let dispatches = instance
+        .compute_dispatches(&[nrd_sys::Identifier(0)])
+        .expect("GetComputeDispatches");
     println!("{:#?}", dispatches);
 
-    // println!("{:#?}", desc.roughness_encoding());
-    // let lib_desc = nrd_sys::Instance::library_desc();
-    // println!("{:#?}", lib_desc);
-    // let id1 = nrd_sys::Identifier(0);
-    // let mut instance = nrd_sys::Instance::new(&[nrd_sys::DenoiserDesc {
-    //     identifier: id1,
-    //     denoiser: nrd_sys::Denoiser::ReblurDiffuse,
-    // }])
-    // .unwrap();
-    // let desc = instance.desc();
-    // println!("{:#?}", desc);
-
-    // instance
-    //     .set_common_settings(&nrd_sys::CommonSettings {
-    //         resource_size: [1920, 1080],
-    //         rect_size: [1920, 1080],
-    //         ..Default::default()
-    //     })
-    //     .unwrap();
-    // instance
-    //     .set_denoiser_settings(id1, &nrd_sys::ReferenceSettings::default())
-    //     .unwrap();
-
-    // let dispatches = instance.get_compute_dispatches(&[id1]).unwrap();
-
-    // println!("{:#?}", dispatches);
+    if let Some(name) = nrd_sys::denoiser_name(nrd_sys::Denoiser::ReblurDiffuse) {
+        println!("denoiser: {}", name.to_string_lossy());
+    }
 }

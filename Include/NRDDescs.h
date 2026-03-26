@@ -11,7 +11,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #pragma once
 
 #define NRD_DESCS_VERSION_MAJOR 4
-#define NRD_DESCS_VERSION_MINOR 15
+#define NRD_DESCS_VERSION_MINOR 17
 
 static_assert(NRD_VERSION_MAJOR == NRD_DESCS_VERSION_MAJOR && NRD_VERSION_MINOR == NRD_DESCS_VERSION_MINOR, "Please, update all NRD SDK files");
 
@@ -49,8 +49,13 @@ namespace nrd
         // Linear view depth for primary rays (R16f+)
         IN_VIEWZ,
 
-        // (Optional) User-provided history confidence in range 0-1, i.e. antilag (R8+)
-        // Used only if "CommonSettings::isHistoryConfidenceAvailable = true" and "NRD_SUPPORTS_HISTORY_CONFIDENCE = 1"
+        // (Optional) User-provided history confidence in range 0-1, i.e. antilag (R8+):
+        //  - used only if "CommonSettings::isHistoryConfidenceAvailable = true" and "NRD_SUPPORTS_HISTORY_CONFIDENCE = 1"
+        //  - must be computed for the previous frame in the current frame (the only one trivial solution in any case)
+        //  - textures may be at lower resolution (linearly upscaled)
+        //  - separation into diffuse and specular is optional:
+        //    - 1 path/pixel (probabilistic lobe selection) => better compute lighting confidence and use for both inputs
+        //    - 1 diffuse path/pixel + 1 specular path/pixel => may be better to separate
         IN_DIFF_CONFIDENCE,
         IN_SPEC_CONFIDENCE,
 
@@ -58,12 +63,6 @@ namespace nrd
         // Disocclusion threshold is mixed between "disocclusionThreshold" and "disocclusionThresholdAlternate"
         // Used only if "CommonSettings::isDisocclusionThresholdMixAvailable = true" and "NRD_SUPPORTS_DISOCCLUSION_THRESHOLD_MIX = 1"
         IN_DISOCCLUSION_THRESHOLD_MIX,
-
-        // (Optional) Base color (can be decoupled to diffuse and specular albedo based on metalness) and metalness (RGBA8+)
-        // Used only if "CommonSettings::isBaseColorMetalnessAvailable = true" and "NRD_SUPPORTS_BASECOLOR_METALNESS = 1".
-        // Currently used only by REBLUR (if Temporal Stabilization pass is available and "stabilizationStrength != 0")
-        // to patch MV if specular (virtual) motion prevails on diffuse (surface) motion
-        IN_BASECOLOR_METALNESS,
 
         //=============================================================================================================================
         // NOISY INPUTS
@@ -107,15 +106,19 @@ namespace nrd
 
         // IMPORTANT: Most of denoisers do not write into output pixels outside of "CommonSettings::denoisingRange"!
 
-        // Radiance and hit distance
-        //      REBLUR: use "REBLUR_BackEnd_UnpackRadianceAndNormHitDist" for decoding (RGBA16f+)
+        // Radiance and normalized hit distance (occlusion) or history length
+        //      REBLUR: use "REBLUR_BackEnd_UnpackRadianceAndNormHitDist" for decoding (R11G11B10f+)
+        //          .w = diffuse or specular occlusion (default) or history length in frames if "ReblurSettings::returnHistoryLengthInsteadOfOcclusion = true"
         //      RELAX: use "RELAX_BackEnd_UnpackRadiance" for decoding (R11G11B10f+)
+        //          .w = diffuse history length in frames
         OUT_DIFF_RADIANCE_HITDIST,
         OUT_SPEC_RADIANCE_HITDIST,
 
         // SH data
         //      REBLUR: use "REBLUR_BackEnd_UnpackSh" for decoding (2x RGBA16f+)
+        //          .normHitDist = diffuse or specular occlusion (default) or history length in frames if "ReblurSettings::returnHistoryLengthInsteadOfOcclusion = true"
         //      RELAX: use "RELAX_BackEnd_UnpackSh" for decoding (2x RGBA16f+)
+        //          .normHitDist = diffuse history length in frames
         OUT_DIFF_SH0,
         OUT_DIFF_SH1,
         OUT_SPEC_SH0,
@@ -158,8 +161,8 @@ namespace nrd
         /*
         IMPORTANT:
           - IN_MV, IN_NORMAL_ROUGHNESS, IN_VIEWZ are used by any denoiser, but these denoisers DON'T use:
-              - SIGMA_SHADOW & SIGMA_SHADOW_TRANSLUCENCY - IN_MV, if "stabilizationStrength = 0"
-              - REFERENCE - IN_MV, IN_NORMAL_ROUGHNESS, IN_VIEWZ
+            - SIGMA_SHADOW & SIGMA_SHADOW_TRANSLUCENCY - IN_MV, if "stabilizationStrength = 0"
+            - REFERENCE - IN_MV, IN_NORMAL_ROUGHNESS, IN_VIEWZ
           - Optional inputs are in ()
         */
 
@@ -179,7 +182,7 @@ namespace nrd
         // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1
         REBLUR_DIFFUSE_SH,
 
-        // INPUTS - IN_SPEC_RADIANCE_HITDIST (IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX, IN_BASECOLOR_METALNESS)
+        // INPUTS - IN_SPEC_RADIANCE_HITDIST (IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX)
         // OUTPUTS - OUT_SPEC_RADIANCE_HITDIST
         REBLUR_SPECULAR,
 
@@ -187,11 +190,11 @@ namespace nrd
         // OUTPUTS - OUT_SPEC_HITDIST
         REBLUR_SPECULAR_OCCLUSION,
 
-        // INPUTS - IN_SPEC_SH0, IN_SPEC_SH1 (IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX, IN_BASECOLOR_METALNESS)
+        // INPUTS - IN_SPEC_SH0, IN_SPEC_SH1 (IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX)
         // OUTPUTS - OUT_SPEC_SH0, OUT_SPEC_SH1
         REBLUR_SPECULAR_SH,
 
-        // INPUTS - IN_DIFF_RADIANCE_HITDIST, IN_SPEC_RADIANCE_HITDIST (IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX, IN_BASECOLOR_METALNESS)
+        // INPUTS - IN_DIFF_RADIANCE_HITDIST, IN_SPEC_RADIANCE_HITDIST (IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX)
         // OUTPUTS - OUT_DIFF_RADIANCE_HITDIST, OUT_SPEC_RADIANCE_HITDIST
         REBLUR_DIFFUSE_SPECULAR,
 
@@ -199,7 +202,7 @@ namespace nrd
         // OUTPUTS - OUT_DIFF_HITDIST, OUT_SPEC_HITDIST
         REBLUR_DIFFUSE_SPECULAR_OCCLUSION,
 
-        // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1, IN_SPEC_SH0, IN_SPEC_SH1 (IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX, IN_BASECOLOR_METALNESS)
+        // INPUTS - IN_DIFF_SH0, IN_DIFF_SH1, IN_SPEC_SH0, IN_SPEC_SH1 (IN_DIFF_CONFIDENCE, IN_SPEC_CONFIDENCE, IN_DISOCCLUSION_THRESHOLD_MIX)
         // OUTPUTS - OUT_DIFF_SH0, OUT_DIFF_SH1, OUT_SPEC_SH0, OUT_SPEC_SH1
         REBLUR_DIFFUSE_SPECULAR_SH,
 
@@ -344,8 +347,8 @@ namespace nrd
         RGBA8_UNORM,
         RGBA8_SNORM,
 
-        // Moderate IQ on curved (not bumpy) surfaces, but offers optional materialID support (normals are oct-packed, 2 bits for material ID)
-        R10_G10_B10_A2_UNORM,
+        // Close to best IQ on curved (not bumpy) surfaces, but offers optional materialID support (normals are oct-packed, 2 bits for material ID)
+        R10_G10_B10_A2_UNORM, // RECOMMENDED
 
         // Best IQ on curved (not bumpy) surfaces
         RGBA16_UNORM,
@@ -360,8 +363,8 @@ namespace nrd
         // Alpha (m)
         SQ_LINEAR,
 
-        // Linear roughness (best choice)
-        LINEAR,
+        // Linear roughness
+        LINEAR, // RECOMMENDED
 
         // Sqrt(linear roughness)
         SQRT_LINEAR,
@@ -371,9 +374,9 @@ namespace nrd
 
     struct AllocationCallbacks
     {
-        void* (*Allocate)(void* userArg, size_t size, size_t alignment);
-        void* (*Reallocate)(void* userArg, void* memory, size_t size, size_t alignment);
-        void (*Free)(void* userArg, void* memory);
+        void* (NRD_CALL *Allocate)(void* userArg, size_t size, size_t alignment);
+        void* (NRD_CALL *Reallocate)(void* userArg, void* memory, size_t size, size_t alignment);
+        void (NRD_CALL *Free)(void* userArg, void* memory);
         void* userArg;
     };
 
@@ -440,53 +443,59 @@ namespace nrd
         ComputeShaderDesc computeShaderDXBC;
         ComputeShaderDesc computeShaderDXIL;
         ComputeShaderDesc computeShaderSPIRV;
-        const char* shaderFileName;
-        const char* shaderEntryPointName;
         const ResourceRangeDesc* resourceRanges;
         uint32_t resourceRangesNum; // up to 2 ranges: "TEXTURE" inputs (optional) and "TEXTURE_STORAGE" outputs
 
         // Hint that pipeline has a constant buffer with shared parameters from "InstanceDesc"
         bool hasConstantData;
+
+        // Format: "fileName|macro1=value1|macro2=value2..." (useful for custom integrations)
+        char shaderIdentifier[256];
     };
 
     struct DescriptorPoolDesc
     {
-        // Useful for tight (per pipeline) pipeline layouts (root signatures)
-        // - summed up across all dispatches
-        // - samplers are summed only if "samplersInSeparateSet = false", otherwise "totalSamplersNum = Sampler::MAX_NUM"
-        uint32_t totalConstantBuffersNum;
-        uint32_t totalSamplersNum;                       // not needed if used as static/immutable samplers
-        uint32_t totalTexturesNum;
-        uint32_t totalStorageTexturesNum;
+        // (Recommended) use a root CBV (push descriptor) for constants
+        // (Recommended) use static (immutable) samplers
 
-        // Useful for a shared pipeline layout
-        //  - show max usage
+        // (Recommended) if a shared pipeline layout (root signature) is used:
+        //  - represents maximum number of resources in a pipeline
         //  - always 1 constant buffer
         //  - always "Sampler::MAX_NUM" samplers
         uint32_t perSetTexturesMaxNum;
         uint32_t perSetStorageTexturesMaxNum;
 
+        // If tight (per pipeline) pipeline layouts are used:
+        //  - summed up across all dispatches
+        uint32_t totalTexturesNum;
+        uint32_t totalStorageTexturesNum;
+
+        // Maximum number of descriptor sets in a descriptor pool
         uint32_t setsMaxNum;
     };
 
     struct InstanceDesc
     {
-        // Constant buffer
-        uint32_t constantBufferMaxDataSize;
-        uint32_t constantBufferRegisterIndex;           // = "NRD_CONSTANT_BUFFER_REGISTER_INDEX"
-        uint32_t constantBufferAndResourcesSpaceIndex;  // = "NRD_CONSTANT_BUFFER_AND_RESOURCES_SPACE_INDEX"
+        // Register spaces
+        uint32_t constantBufferAndSamplersSpaceIndex;   // constant buffer and samplers (= "NRD_CONSTANT_BUFFER_AND_SAMPLERS_SPACE_INDEX")
+        uint32_t resourcesSpaceIndex;                   // SRVs and UAVs (= "NRD_RESOURCES_SPACE_INDEX")
 
-        // Samplers
+        // Base registers
+        uint32_t constantBufferRegisterIndex;           // = "NRD_CONSTANT_BUFFER_REGISTER_INDEX"
+        uint32_t samplersBaseRegisterIndex;             // = 0
+        uint32_t resourcesBaseRegisterIndex;            // = 0
+
+        // Constant buffer (a root/push descriptor recommended)
+        uint32_t constantBufferMaxDataSize;
+
+        // Samplers (root/immutable samplers recommended)
         const Sampler* samplers;
         uint32_t samplersNum;                           // = "Sampler::MAX_NUM"
-        uint32_t samplersSpaceIndex;                    // = "NRD_SAMPLERS_SPACE_INDEX"
-        uint32_t samplersBaseRegisterIndex;
-        bool samplersInSeparateSet;                     // "true" if "NRD_SAMPLERS_SPACE_INDEX" is unique and not shared with other spaces
 
         // Pipelines
+        const char* shaderEntryPoint;                   // = "NRD_CS_MAIN"
         const PipelineDesc* pipelines;
         uint32_t pipelinesNum;
-        uint32_t resourcesBaseRegisterIndex;
 
         // Textures
         const TextureDesc* permanentPool;
@@ -494,17 +503,17 @@ namespace nrd
         const TextureDesc* transientPool;
         uint32_t transientPoolSize;
 
-        // ( Optional ) Limits
+        // (Optional) Limits
         DescriptorPoolDesc descriptorPoolDesc;
     };
 
     struct DispatchDesc
     {
-        // ( Optional )
+        // (Optional)
         const char* name;
         Identifier identifier; // denoiser this dispatch belongs to
 
-        // Concatenated resources for all "resourceRanges" in "DenoiserDesc::pipelines[ pipelineIndex ]"
+        // Concatenated resources for all "resourceRanges" in "DenoiserDesc::pipelines[pipelineIndex]"
         const ResourceDesc* resources;
         uint32_t resourcesNum;
 

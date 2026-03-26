@@ -1,42 +1,7 @@
-// use std::{ffi::OsString, io::Write};
-
-// fn get_install_path() -> impl Iterator<Item = (&'static str, OsString)> {
-//     get_download_name().iter().map(|download_name| {
-//         let mut path: std::path::PathBuf = std::env::var("OUT_DIR").unwrap().into();
-//         path.push(download_name);
-//         (*download_name, path.into_os_string())
-//     })
-// }
-
-// fn get_download_name() -> &'static [&'static str] {
-//     #[cfg(target_family = "unix")]
-//     {
-//         return &["libNRD.so"];
-//     }
-//     #[cfg(target_family = "windows")]
-//     {
-//         return &["NRD.lib", "NRD.dll"];
-//     }
-//     #[allow(unreachable_code)]
-//     {
-//         panic!()
-//     }
-// }
+use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
-    // for (download_name, install_path) in get_install_path() {
-    //     if !std::fs::exists(&install_path).expect("Unable to check library file location") {
-    //         let data = sysreq::get(format!(
-    //             "https://github.com/dust-engine/nrd-sys/releases/download/v0.2/{}",
-    //             download_name
-    //         ))
-    //         .expect("Download file error");
-    //         let mut file =
-    //             std::fs::File::create(install_path).expect("Unable to create library file");
-    //         file.write_all(&data).expect("Unable to write library file");
-    //     }
-    // }
-
     // copy NRD.dylib to OUT_DIR
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let nrd_lib_path = std::path::Path::new(&out_dir).join("libNRD.dylib");
@@ -75,4 +40,115 @@ fn main() {
         "cargo:rustc-link-search={}",
         std::env::var("OUT_DIR").unwrap()
     );
+    println!("cargo:rerun-if-changed=Include/NRD.h");
+    println!("cargo:rerun-if-changed=Include/libNRD.dylib");
+    println!("cargo:rerun-if-changed=Include/libNRD.so");
+    println!("cargo:rerun-if-changed=embed/spirv");
+    // println!("cargo:rerun-if-changed=Include/NRD.dll");
+
+    write_embedded_msl_rust();
+}
+
+fn write_embedded_msl_rust() {
+    let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let gen_path = out_dir.join("embedded_msl.rs");
+    let msl_dir = out_dir.join("msl");
+    let _ = std::fs::remove_dir_all(&msl_dir);
+
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let embed_msl = std::env::var("CARGO_FEATURE_EMBED_MSL").is_ok();
+
+    if !embed_msl || target_os != "macos" {
+        std::fs::write(
+            &gen_path,
+            r#"pub fn msl_shader_for_pipeline(_index: usize) -> Option<super::MslShaderDesc> {
+    None
+}
+pub const EMBEDDED_PIPELINE_COUNT: usize = 0;
+"#,
+        )
+        .expect("write stub embedded_msl.rs");
+        return;
+    }
+
+    let manifest_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
+    let spirv_dir = manifest_dir.join("embed/spirv");
+    let mut spv_files: Vec<PathBuf> = std::fs::read_dir(&spirv_dir)
+        .unwrap_or_else(|e| {
+            panic!(
+                "embed-msl: read {}: {e}. Run `cargo run --example export_spirv_for_embed` first.",
+                spirv_dir.display()
+            )
+        })
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| p.extension().is_some_and(|x| x == "spv"))
+        .collect();
+    spv_files.sort();
+    if spv_files.is_empty() {
+        panic!(
+            "embed-msl: no .spv files in {}. Run `cargo run --example export_spirv_for_embed`.",
+            spirv_dir.display()
+        );
+    }
+
+    std::fs::create_dir_all(&msl_dir).expect("create OUT_DIR/msl");
+
+    let spirv_cross = std::env::var_os("SPIRV_CROSS")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("spirv-cross"));
+    let msl_version = std::env::var("NRD_MSL_VERSION").unwrap_or_else(|_| "20300".into());
+    let entry = std::fs::read_to_string(spirv_dir.join("entry_point.txt"))
+        .unwrap_or_else(|_| "NRD_CS_MAIN".to_string());
+    let entry = entry.lines().next().unwrap_or("NRD_CS_MAIN").trim().to_string();
+    if entry.is_empty() {
+        panic!("embed/spirv/entry_point.txt is empty");
+    }
+
+    for (i, spv) in spv_files.iter().enumerate() {
+        let metal_path = msl_dir.join(format!("{i:03}.metal"));
+        let status = Command::new(&spirv_cross)
+            .arg(spv)
+            .arg("--msl")
+            .arg("--msl-version")
+            .arg(&msl_version)
+            .arg("--stage")
+            .arg("comp")
+            .arg("--entry")
+            .arg(&entry)
+            .arg("--output")
+            .arg(&metal_path)
+            .status()
+            .unwrap_or_else(|e| {
+                panic!(
+                    "embed-msl: failed to run spirv-cross ({spirv_cross:?}): {e}. Install SPIRV-Cross or set SPIRV_CROSS."
+                )
+            });
+        if !status.success() {
+            panic!(
+                "embed-msl: spirv-cross failed for {} (status {status})",
+                spv.display()
+            );
+        }
+    }
+
+    let n = spv_files.len();
+    let mut lines = String::new();
+    for i in 0..n {
+        lines.push_str(&format!(
+            "static MSL_{i}: &str = include_str!(concat!(env!(\"OUT_DIR\"), \"/msl/{i:03}.metal\"));\n"
+        ));
+    }
+    lines.push_str("pub fn msl_shader_for_pipeline(index: usize) -> Option<super::MslShaderDesc> {\n");
+    lines.push_str("    let source = match index {\n");
+    for i in 0..n {
+        lines.push_str(&format!("        {i} => MSL_{i},\n"));
+    }
+    lines.push_str("        _ => return None,\n");
+    lines.push_str("    };\n");
+    lines.push_str("    Some(super::MslShaderDesc { source })\n");
+    lines.push_str("}\n");
+    lines.push_str(&format!("pub const EMBEDDED_PIPELINE_COUNT: usize = {n};\n"));
+
+    std::fs::write(&gen_path, lines).expect("write embedded_msl.rs");
 }
