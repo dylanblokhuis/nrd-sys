@@ -10,7 +10,8 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
-    let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let manifest_dir =
+        PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
 
     let nrd_source = nrd_source_dir(&manifest_dir);
     let cmake_lists = nrd_source.join("CMakeLists.txt");
@@ -33,12 +34,7 @@ fn main() {
     let shaders_display = shaders_out.to_str().expect("nrd_shaders path utf-8");
 
     println!("cargo:rerun-if-env-changed=NRD_SYS_NRD_SOURCE");
-    println!("cargo:rerun-if-env-changed=NRD_SYS_EMBED_METAL_SHADERS");
     println!("cargo:rerun-if-changed={}", cmake_lists.display());
-
-    let embed_metal = env::var("NRD_SYS_EMBED_METAL_SHADERS")
-        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
-        .unwrap_or(false);
 
     let target = env::var("TARGET").unwrap_or_default();
     let target_is_apple = target.contains("apple");
@@ -59,10 +55,7 @@ fn main() {
         .build_target("NRD");
 
     if target_is_apple {
-        config.define(
-            "NRD_EMBEDS_METAL_SHADERS",
-            if embed_metal { "ON" } else { "OFF" },
-        );
+        config.define("NRD_EMBEDS_METAL_SHADERS", "ON");
     }
 
     let _dst = config.build();
@@ -93,15 +86,9 @@ fn emit_link_lines(out_dir: &Path, build_static: bool, target: &str) {
         println!("cargo:rustc-link-search=native={}", out_dir.display());
 
         if target.contains("apple") {
-            println!(
-                "cargo:rustc-link-arg=-Wl,-rpath,{}",
-                out_dir.display()
-            );
+            println!("cargo:rustc-link-arg=-Wl,-rpath,{}", out_dir.display());
         } else if target.contains("linux") {
-            println!(
-                "cargo:rustc-link-arg=-Wl,-rpath,{}",
-                out_dir.display()
-            );
+            println!("cargo:rustc-link-arg=-Wl,-rpath,{}", out_dir.display());
         }
     }
 }
