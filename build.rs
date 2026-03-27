@@ -1,33 +1,107 @@
+//! Builds [NVIDIA Ray Tracing Denoiser](https://github.com/dylanblokhuis/NVIDIA_RayTracingDenoiser) via CMake.
+//!
+//! Source tree: git submodule at `third_party/NVIDIA_RayTracingDenoiser`, or set `NRD_SYS_NRD_SOURCE`.
+//!
+//! Link mode: enable Cargo feature `static` for a static archive; default is shared (`.dylib` / `.so` / `.dll`).
+
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+
 fn main() {
-    // copy NRD.dylib to OUT_DIR
-    let out_dir = std::env::var("OUT_DIR").unwrap();
-    let nrd_lib_path = std::path::Path::new(&out_dir).join("libNRD.dylib");
-    if !nrd_lib_path.exists() {
-        #[cfg(target_os = "macos")]
-        {
-            std::fs::copy("Include/libNRD.dylib", &nrd_lib_path)
-                .expect("Failed to copy libNRD.dylib to OUT_DIR");
-        }
-        #[cfg(target_os = "linux")]
-        {
-            let so_path = std::path::Path::new(&out_dir).join("libNRD.so");
-            std::fs::copy("Include/libNRD.so", &so_path)
-                .expect("Failed to copy libNRD.so to OUT_DIR");
-        }
-        #[cfg(target_os = "windows")]
-        {
-            let dll_path = std::path::Path::new(&out_dir).join("NRD.dll");
-            std::fs::copy("Include/NRD.dll", &dll_path).expect("Failed to copy NRD.dll to OUT_DIR");
-        }
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
+    let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+
+    let nrd_source = nrd_source_dir(&manifest_dir);
+    let cmake_lists = nrd_source.join("CMakeLists.txt");
+    if !cmake_lists.is_file() {
+        panic!(
+            "NRD source not found at {} (missing CMakeLists.txt).\n\
+             Initialize the submodule:\n\
+               git submodule update --init --recursive third_party/NVIDIA_RayTracingDenoiser\n\
+             Or set NRD_SYS_NRD_SOURCE to the repository root.",
+            nrd_source.display()
+        );
     }
 
-    println!("cargo:rustc-link-lib=NRD");
-    println!(
-        "cargo:rustc-link-search={}",
-        std::env::var("OUT_DIR").unwrap()
-    );
-    println!("cargo:rerun-if-changed=Include/NRD.h");
-    println!("cargo:rerun-if-changed=Include/libNRD.dylib");
-    println!("cargo:rerun-if-changed=Include/libNRD.so");
-    // println!("cargo:rerun-if-changed=Include/NRD.dll");
+    let build_static = env::var_os("CARGO_FEATURE_STATIC").is_some();
+    let out_display = out_dir.to_str().expect("OUT_DIR utf-8");
+    // Keep generated shaders under OUT_DIR so incremental CMake runs do not clash with stale
+    // files in the source tree `third_party/.../_Shaders`.
+    let shaders_out = out_dir.join("nrd_shaders");
+    fs::create_dir_all(&shaders_out).expect("create nrd_shaders");
+    let shaders_display = shaders_out.to_str().expect("nrd_shaders path utf-8");
+
+    println!("cargo:rerun-if-env-changed=NRD_SYS_NRD_SOURCE");
+    println!("cargo:rerun-if-env-changed=NRD_SYS_EMBED_METAL_SHADERS");
+    println!("cargo:rerun-if-changed={}", cmake_lists.display());
+
+    let embed_metal = env::var("NRD_SYS_EMBED_METAL_SHADERS")
+        .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        .unwrap_or(false);
+
+    let target = env::var("TARGET").unwrap_or_default();
+    let target_is_apple = target.contains("apple");
+
+    let mut config = cmake::Config::new(&nrd_source);
+    config
+        .out_dir(&out_dir)
+        .profile("Release")
+        .define("NRD_SHADERS_PATH", shaders_display)
+        .define(
+            "NRD_STATIC_LIBRARY",
+            if build_static { "ON" } else { "OFF" },
+        )
+        .define("CMAKE_RUNTIME_OUTPUT_DIRECTORY", out_display)
+        .define("CMAKE_LIBRARY_OUTPUT_DIRECTORY", out_display)
+        .define("CMAKE_ARCHIVE_OUTPUT_DIRECTORY", out_display)
+        // NRD does not define an `install` CMake target; build the library target explicitly.
+        .build_target("NRD");
+
+    if target_is_apple {
+        config.define(
+            "NRD_EMBEDS_METAL_SHADERS",
+            if embed_metal { "ON" } else { "OFF" },
+        );
+    }
+
+    let _dst = config.build();
+
+    emit_link_lines(&out_dir, build_static, &target);
+}
+
+fn nrd_source_dir(manifest_dir: &Path) -> PathBuf {
+    env::var_os("NRD_SYS_NRD_SOURCE")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| manifest_dir.join("third_party/NVIDIA_RayTracingDenoiser"))
+}
+
+fn emit_link_lines(out_dir: &Path, build_static: bool, target: &str) {
+    if build_static {
+        println!("cargo:rustc-link-lib=static=NRD");
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+        if target.contains("apple") {
+            println!("cargo:rustc-link-lib=c++");
+        } else if target.contains("linux") || target.contains("android") {
+            println!("cargo:rustc-link-lib=stdc++");
+        }
+    } else if target.contains("windows") {
+        println!("cargo:rustc-link-lib=NRD");
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+    } else {
+        println!("cargo:rustc-link-lib=dylib=NRD");
+        println!("cargo:rustc-link-search=native={}", out_dir.display());
+
+        if target.contains("apple") {
+            println!(
+                "cargo:rustc-link-arg=-Wl,-rpath,{}",
+                out_dir.display()
+            );
+        } else if target.contains("linux") {
+            println!(
+                "cargo:rustc-link-arg=-Wl,-rpath,{}",
+                out_dir.display()
+            );
+        }
+    }
 }
