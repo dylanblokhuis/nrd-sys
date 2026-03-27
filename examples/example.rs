@@ -1,3 +1,10 @@
+fn shader_bytes(desc: &nrd_sys::ComputeShaderDesc) -> &[u8] {
+    if desc.bytecode.is_null() || desc.size == 0 {
+        return &[];
+    }
+    unsafe { std::slice::from_raw_parts(desc.bytecode as *const u8, desc.size as usize) }
+}
+
 fn main() {
     let _lib = nrd_sys::LibraryInfo::query().expect(
         "linked libNRD major.minor must match this crate's headers; update Include/libNRD or regenerate ffi",
@@ -10,18 +17,12 @@ fn main() {
     .expect("Create NRD instance");
 
     let inst_desc = instance.description().expect("instance description");
-    for view in inst_desc.pipelines_with_msl() {
-        let spirv = unsafe {
-            std::slice::from_raw_parts(
-                view.pipeline.computeShaderSPIRV.bytecode as *const u8,
-                view.pipeline.computeShaderSPIRV.size as usize,
-            )
-        };
+    for pipeline in inst_desc.pipelines() {
+        let spirv = shader_bytes(&pipeline.computeShaderSPIRV);
+        let metal = shader_bytes(&pipeline.computeShaderMetal);
         println!("SPIRV size: {} bytes", spirv.len());
-        if let Some(msl) = view.compute_shader_msl {
-            println!("embedded MSL size: {} bytes", msl.size());
-        }
-        println!("{:#?}", view);
+        println!("Metal metallib size: {} bytes", metal.len());
+        println!("{:#?}", pipeline);
     }
     println!("{:#?}", inst_desc.raw());
 

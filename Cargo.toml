@@ -11,8 +11,6 @@ repository = "https://github.com/dust-engine/nrd-sys"
 
 [features]
 default = []
-# Embed Metal sources at build time (macOS target only). Requires spirv-cross and embed/spirv/*.spv (see export_spirv_for_embed example).
-embed-msl = []
 
 [dependencies]
 allocator-api2 = "0.3.0"

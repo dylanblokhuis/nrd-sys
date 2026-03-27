@@ -5,8 +5,6 @@
 
 pub mod ffi;
 
-mod embed_msl;
-
 pub mod api;
 
 pub use api::*;

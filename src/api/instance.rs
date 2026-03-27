@@ -1,5 +1,5 @@
 use std::{
-    ffi::{c_char, c_void, CStr},
+    ffi::{c_void, CStr},
     fmt,
     ops::Deref,
     ptr,
@@ -15,32 +15,6 @@ use crate::ffi;
 pub struct DenoiserSlot {
     pub identifier: Identifier,
     pub denoiser: Denoiser,
-}
-
-/// Pairs the NRD [`ffi::nrd_PipelineDesc`] with optional embedded MSL when built with `embed-msl` on macOS.
-#[derive(Clone, Copy)]
-pub struct PipelineDescView<'a> {
-    pub pipeline: &'a ffi::nrd_PipelineDesc,
-    /// Metal source matching this pipeline index when the crate was built with `embed-msl` for macOS.
-    pub compute_shader_msl: Option<crate::embed_msl::MslShaderDesc>,
-}
-
-impl fmt::Debug for PipelineDescView<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("PipelineDescView")
-            .field("shader_identifier", &shader_identifier_cstr(&self.pipeline.shaderIdentifier))
-            .field("compute_shader_spirv", &self.pipeline.computeShaderSPIRV)
-            .field("compute_shader_msl", &self.compute_shader_msl)
-            .field("resource_ranges_num", &self.pipeline.resourceRangesNum)
-            .field("has_constant_data", &self.pipeline.hasConstantData)
-            .finish()
-    }
-}
-
-fn shader_identifier_cstr(id: &[c_char; 256]) -> String {
-    let bytes = unsafe { std::slice::from_raw_parts(id.as_ptr() as *const u8, id.len()) };
-    let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
-    String::from_utf8_lossy(&bytes[..end]).into_owned()
 }
 
 /// Immutable view of [`ffi::nrd_InstanceDesc`]; pointers are valid for the lifetime of the [`Instance`].
@@ -101,14 +75,6 @@ impl<'a> InstanceDescription<'a> {
         unsafe {
             std::slice::from_raw_parts(self.raw.pipelines, self.raw.pipelinesNum as usize)
         }
-    }
-
-    /// Like [`Self::pipelines`], plus [`PipelineDescView::compute_shader_msl`] from build-time embedding (`embed-msl`).
-    pub fn pipelines_with_msl(&self) -> impl Iterator<Item = PipelineDescView<'a>> + '_ {
-        self.pipelines().iter().enumerate().map(|(i, p)| PipelineDescView {
-            pipeline: p,
-            compute_shader_msl: crate::embed_msl::msl_shader_for_pipeline(i),
-        })
     }
 
     pub fn permanent_pool(&self) -> &'a [ffi::nrd_TextureDesc] {

@@ -11,10 +11,9 @@ pub(crate) use error::result_from_ffi;
 
 /// Fallible NRD operations use this [`Result`](std::result::Result) type.
 pub type NrdResult<T> = std::result::Result<T, Error>;
-pub use crate::embed_msl::{msl_shader_for_pipeline, MslShaderDesc, EMBEDDED_PIPELINE_COUNT};
 pub use instance::{
     allocation_callbacks_none, DenoiserSlot, DispatchDesc, Instance, InstanceDescription,
-    PipelineDescView, ResourceBinding,
+    ResourceBinding,
 };
 pub use library::LibraryInfo;
 

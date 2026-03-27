@@ -443,6 +443,7 @@ namespace nrd
         ComputeShaderDesc computeShaderDXBC;
         ComputeShaderDesc computeShaderDXIL;
         ComputeShaderDesc computeShaderSPIRV;
+        ComputeShaderDesc computeShaderMetal;
         const ResourceRangeDesc* resourceRanges;
         uint32_t resourceRangesNum; // up to 2 ranges: "TEXTURE" inputs (optional) and "TEXTURE_STORAGE" outputs
 

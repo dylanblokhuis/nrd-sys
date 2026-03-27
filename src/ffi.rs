@@ -923,6 +923,8 @@ pub struct nrd_PipelineDesc {
     pub computeShaderDXBC: nrd_ComputeShaderDesc,
     pub computeShaderDXIL: nrd_ComputeShaderDesc,
     pub computeShaderSPIRV: nrd_ComputeShaderDesc,
+    /// Precompiled `.metallib` bytes (see `nrd::PipelineDesc::computeShaderMetal` in NRDDescs.h).
+    pub computeShaderMetal: nrd_ComputeShaderDesc,
     pub resourceRanges: *const nrd_ResourceRangeDesc,
     pub resourceRangesNum: u32,
     pub hasConstantData: bool,
@@ -930,7 +932,7 @@ pub struct nrd_PipelineDesc {
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of nrd_PipelineDesc"][::std::mem::size_of::<nrd_PipelineDesc>() - 320usize];
+    ["Size of nrd_PipelineDesc"][::std::mem::size_of::<nrd_PipelineDesc>() - 336usize];
     ["Alignment of nrd_PipelineDesc"][::std::mem::align_of::<nrd_PipelineDesc>() - 8usize];
     ["Offset of field: nrd_PipelineDesc::computeShaderDXBC"]
         [::std::mem::offset_of!(nrd_PipelineDesc, computeShaderDXBC) - 0usize];
@@ -938,14 +940,16 @@ const _: () = {
         [::std::mem::offset_of!(nrd_PipelineDesc, computeShaderDXIL) - 16usize];
     ["Offset of field: nrd_PipelineDesc::computeShaderSPIRV"]
         [::std::mem::offset_of!(nrd_PipelineDesc, computeShaderSPIRV) - 32usize];
+    ["Offset of field: nrd_PipelineDesc::computeShaderMetal"]
+        [::std::mem::offset_of!(nrd_PipelineDesc, computeShaderMetal) - 48usize];
     ["Offset of field: nrd_PipelineDesc::resourceRanges"]
-        [::std::mem::offset_of!(nrd_PipelineDesc, resourceRanges) - 48usize];
+        [::std::mem::offset_of!(nrd_PipelineDesc, resourceRanges) - 64usize];
     ["Offset of field: nrd_PipelineDesc::resourceRangesNum"]
-        [::std::mem::offset_of!(nrd_PipelineDesc, resourceRangesNum) - 56usize];
+        [::std::mem::offset_of!(nrd_PipelineDesc, resourceRangesNum) - 72usize];
     ["Offset of field: nrd_PipelineDesc::hasConstantData"]
-        [::std::mem::offset_of!(nrd_PipelineDesc, hasConstantData) - 60usize];
+        [::std::mem::offset_of!(nrd_PipelineDesc, hasConstantData) - 76usize];
     ["Offset of field: nrd_PipelineDesc::shaderIdentifier"]
-        [::std::mem::offset_of!(nrd_PipelineDesc, shaderIdentifier) - 61usize];
+        [::std::mem::offset_of!(nrd_PipelineDesc, shaderIdentifier) - 77usize];
 };
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
